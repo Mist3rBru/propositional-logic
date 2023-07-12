@@ -1,0 +1,44 @@
+{
+  "version": "0.0.0",
+  "name": "@mist3rbru/p-logic",
+  "access": "public",
+  "private": false,
+  "author": {
+    "name": "Mist3rBru",
+    "git": "https://github.com/Mist3rBru"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/Mist3rBru/propositional-logic#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mist3rBru/propositional-logic"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "logic",
+    "propositional",
+    "math"
+  ],
+  "scripts": {
+    "lint": "tsc && prettier --write .",
+    "build": "unbuild",
+    "test": "vitest --run",
+    "test:w": "vitest --watch",
+    "test:ci": "vitest --run --coverage",
+    "ci": "run-s lint build test",
+    "publish": "changeset publish",
+    "release": "run-s ci publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.2",
+    "@types/node": "^20.3.3",
+    "changeset": "^0.2.6",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6",
+    "unbuild": "^1.2.1",
+    "vitest": "^0.33.0"
+  }
+}

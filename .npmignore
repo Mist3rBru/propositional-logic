@@ -1,0 +1,13 @@
+.git/
+.changeset/
+.github/
+.vscode/
+src/
+
+.editorconfig
+.gitignore
+.prettierignore
+.prettierrc
+build.config.ts
+tsconfig.json
+vite.config.js
