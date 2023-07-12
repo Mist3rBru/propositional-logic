@@ -1,6 +1,6 @@
 export class InvalidLineError extends Error {
   constructor(line: number) {
-    super(`'${line}' does not exist`)
+    super(`line '${line}' does not exist`)
     this.name = 'InvalidLineError'
   }
 }
