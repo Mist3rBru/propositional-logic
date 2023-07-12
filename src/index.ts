@@ -1,7 +1,9 @@
 import * as actions from './actions'
+import { InvalidLineError } from './errors'
 import { clear } from './utils'
 
 export * from './actions'
+export * from './errors'
 
 export type Action = keyof typeof actions
 
@@ -25,7 +27,7 @@ export function resolve<T extends string | string[]>(
 
   const notFoundLine = targetLines.find(n => n < 0 || n >= solvedLines.length)
   if (notFoundLine) {
-    return `linha '${notFoundLine + 1}' não encontrada` as T
+    throw new InvalidLineError(notFoundLine + 1)
   }
 
   return actions[action]

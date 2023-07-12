@@ -1,3 +1,5 @@
+import { MissingTargetLineError } from './errors'
+
 export const arrowRegex = /(?:[-=]>)||→/
 export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
 export const orRegex = /∨|v|V/
@@ -144,4 +146,13 @@ export function invertSignal(line: string): string {
 
 export function getPrompt(lines: string[]): string {
   return lines[lines.length - 1]
+}
+
+export function verifyTargetLines(
+  targetLines: number[],
+  minTargetLines: number
+): void {
+  if (targetLines.length < minTargetLines) {
+    throw new MissingTargetLineError(targetLines.length, minTargetLines)
+  }
 }
