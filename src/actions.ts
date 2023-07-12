@@ -1,4 +1,5 @@
 // http://www.celiomoliterno.eng.br/Arquivos/fatec/TabInferEquiv.pdf
+import { MissingTargetLineError } from './errors'
 import {
   andRegex,
   andSignal,
@@ -25,12 +26,13 @@ import {
   prune,
   resolve,
   split,
-  ungroup,
-  verifyTargetLines
+  ungroup
 } from './utils'
 
 export function dn(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
   if (target.length !== 3) {
@@ -41,7 +43,9 @@ export function dn(lines: string[], targetLines: number[]): string {
 }
 
 export function ip(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
   const signalRegex = orRegex.test(target) ? orRegex : andRegex
@@ -50,7 +54,9 @@ export function ip(lines: string[], targetLines: number[]): string {
 }
 
 export function com(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = prune(lines[targetLines[0]])
   if (target.length < 3) {
@@ -62,7 +68,9 @@ export function com(lines: string[], targetLines: number[]): string {
 }
 
 export function ass(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = prune(lines[targetLines[0]])
   if (target.length <= 3) {
@@ -82,7 +90,9 @@ export function ass(lines: string[], targetLines: number[]): string {
 }
 
 export function dm(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = invertSignal(lines[targetLines[0]])
   if (target.length <= 3) {
@@ -96,7 +106,9 @@ export function dm(lines: string[], targetLines: number[]): string {
 }
 
 export function dis(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   let target = prune(lines[targetLines[0]])
   if (target.length <= 3) {
@@ -133,7 +145,9 @@ export function dis(lines: string[], targetLines: number[]): string {
 }
 
 export function cp(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
   if (target.length <= 3) {
@@ -152,7 +166,9 @@ export function cp(lines: string[], targetLines: number[]): string {
 }
 
 export function cond(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = prune(lines[targetLines[0]])
   if (arrowRegex.test(target)) {
@@ -168,7 +184,9 @@ export function cond(lines: string[], targetLines: number[]): string {
 }
 
 export function bi(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = prune(lines[targetLines[0]])
   if (!biArrowRegex.test(target)) {
@@ -183,7 +201,9 @@ export function bi(lines: string[], targetLines: number[]): string {
 }
 
 export function ad(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = prune(lines[targetLines[0]])
   if (!/^~{0,}\w$/.test(target)) {
@@ -194,7 +214,9 @@ export function ad(lines: string[], targetLines: number[]): string {
 }
 
 export function sim(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
 
@@ -229,7 +251,9 @@ export function sim(lines: string[], targetLines: number[]): string {
 }
 
 export function mp(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 2)
+  if (targetLines.length < 2) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
 
   const [condition, data] = find(
     arrowRegex,
@@ -244,7 +268,9 @@ export function mp(lines: string[], targetLines: number[]): string {
 }
 
 export function mt(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 2)
+  if (targetLines.length < 2) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
 
   const [condition, data] = find(
     arrowRegex,
@@ -261,7 +287,9 @@ export function mt(lines: string[], targetLines: number[]): string {
 }
 
 export function sd(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 2)
+  if (targetLines.length < 2) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
 
   const [condition, data] = find(
     orRegex,
@@ -278,7 +306,9 @@ export function sd(lines: string[], targetLines: number[]): string {
 }
 
 export function sh(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 2)
+  if (targetLines.length < 2) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
 
   const target1 = lines[targetLines[0]]
   const target2 = lines[targetLines[1]]
@@ -298,7 +328,9 @@ export function sh(lines: string[], targetLines: number[]): string {
 }
 
 export function dc(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
     .split(globalRegex(andRegex))
@@ -323,7 +355,9 @@ export function dc(lines: string[], targetLines: number[]): string {
 }
 
 export function dd(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
     .split(globalRegex(andRegex))
@@ -349,7 +383,9 @@ export function dd(lines: string[], targetLines: number[]): string {
 }
 
 export function abs(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 1)
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 1)
+  }
 
   const target = lines[targetLines[0]]
   if (!arrowRegex.test(target)) {
@@ -364,7 +400,9 @@ export function abs(lines: string[], targetLines: number[]): string {
 }
 
 export function conj(lines: string[], targetLines: number[]): string {
-  verifyTargetLines(targetLines, 2)
+  if (targetLines.length < 2) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
 
   const target = [lines[targetLines[0]], lines[targetLines[1]]]
   const letterRegex = /^~{0,}\w$/
