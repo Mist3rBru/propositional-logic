@@ -1,16 +1,30 @@
 import { resolve } from './index'
 
 describe('resolve', () => {
-  it('exceptions', () => {
-    const result = resolve(['mp -1 1', 'mp 1 4'])
+  it('should list exceptions', () => {
+    const result = resolve(['mp -1 1', 'mp 1 4'], [], false)
 
     expect(result).toStrictEqual([
-      `linha '-1' não encontrada`,
-      `linha '4' não encontrada`
+      `line '-1' does not exist`,
+      `line '4' does not exist`
     ])
   })
 
-  it('ex01', () => {
+  it('should return same line', () => {
+    const line = 'q'
+    const result = resolve(line)
+
+    expect(result).toStrictEqual(line)
+  })
+
+  it('should return same lines', () => {
+    const lines = ['q', 'r v s']
+    const result = resolve(lines, [])
+
+    expect(result).toStrictEqual(lines)
+  })
+
+  it('should result example 01', () => {
     const base = ['~p -> ~q v r', ' s v (r -> t)', ' ~p v s', ' ~s', ' q']
     const answers = [
       'sd 3 4',
@@ -28,7 +42,7 @@ describe('resolve', () => {
     )
   })
 
-  it('ex02', () => {
+  it('should result example 02', () => {
     const base = ['~p v s', 'p ^ q', 's ^ ~r -> ~t', 'q -> ~r']
     const answers = [
       'SIM p em 2',
@@ -48,7 +62,7 @@ describe('resolve', () => {
     )
   })
 
-  it('ex03', () => {
+  it('should result example 03', () => {
     const base = ['~s v (~q v r)', 's ->  (r -> t)', '~p -> s', '~p', 'q']
     const answers = [
       'MP em 3 e 4',
@@ -66,7 +80,7 @@ describe('resolve', () => {
     )
   })
 
-  it('ex04', () => {
+  it('should result example 04', () => {
     const base = [
       '(p v ~t) -> ~q',
       '~m-> u',
