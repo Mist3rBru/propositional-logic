@@ -1,6 +1,5 @@
 import * as actions from './actions'
-import { MissingTargetLineError } from './errors'
-import { invalidActionMessage } from './utils'
+import { InvalidActionError, MissingTargetLineError } from './errors'
 
 type Actions = typeof actions
 type ActionKey = keyof Actions
@@ -33,9 +32,9 @@ describe('actions', () => {
   describe('equivalence', () => {
     it('dn: should resolve double not', () => {
       const sut = makeSut('dn')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
-      expect(sut(...make('~m'))).toBe(invalidActionMessage)
+      expect(sut(...make('m'))).toBe('~~m')
       expect(sut(...make('~~m'))).toBe('m')
+      expect(() => sut(...make('~m'))).toThrow(InvalidActionError)
     })
 
     it('ip: should simplify conjunction/disjunction', () => {
@@ -43,23 +42,23 @@ describe('actions', () => {
       expect(sut(...make('m v m'))).toBe('m')
       expect(sut(...make('m ^ m'))).toBe('m')
       expect(sut(...make('m ^ b v m ^ b'))).toBe('m ^ b')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
-      expect(sut(...make('m ^ b'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m ^ b'))).toThrow(InvalidActionError)
     })
 
     it('com: should switch conjunction/disjunction sides', () => {
       const sut = makeSut('com')
       expect(sut(...make('m v r'))).toBe('r v m')
       expect(sut(...make('m ^ r'))).toBe('r ^ m')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
 
     it('ass: should reassociate conjunction/disjunction', () => {
       const sut = makeSut('ass')
       expect(sut(...make('(m v q) v r'))).toBe('m v (q v r)')
       expect(sut(...make('m ^ (q ^ r)'))).toBe('(m ^ q) ^ r')
-      expect(sut(...make('m ^ ~q'))).toBe(invalidActionMessage)
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m ^ ~q'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
 
     it('dm: should invert/resolve group logic', () => {
@@ -68,8 +67,8 @@ describe('actions', () => {
       expect(sut(...make('~m ^ ~r'))).toBe('~(m v r)')
       expect(sut(...make('~(m v r)'))).toBe('~m ^ ~r')
       expect(sut(...make('~(m v ~r)'))).toBe('~m ^ r')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
-      expect(sut(...make('~~m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
     })
 
     it('dis: should resolve distribution', () => {
@@ -77,7 +76,7 @@ describe('actions', () => {
       expect(sut(...make('r ^ (~m v q)'))).toBe('(r ^ ~m) v (r ^ q)')
       expect(sut(...make('(~m v q) ^ r'))).toBe('(r ^ ~m) v (r ^ q)')
       expect(sut(...make('r v (m ^ q)'))).toBe('(r v m) ^ (r v q)')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
 
     it('cp: should invert both logic sides', () => {
@@ -87,15 +86,15 @@ describe('actions', () => {
       expect(sut(...make('m ^ r'))).toBe('~m ^ ~r')
       expect(sut(...make('m ^ r -> u'))).toBe('~m ^ ~r -> ~u')
       expect(sut(...make('~(m ^ r) -> u'))).toBe('~~(m ^ r) -> ~u')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
-      expect(sut(...make('~~m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
     })
 
     it('cond: invert and switch condicional sides', () => {
       const sut = makeSut('cond')
       expect(sut(...make('m -> r'))).toBe('~r -> ~m')
       expect(sut(...make('~m -> ~r'))).toBe('~~r -> ~~m')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
 
       expect(sut(...make('~t v u'))).toBe('t -> u')
     })
@@ -104,7 +103,7 @@ describe('actions', () => {
       const sut = makeSut('bi')
       expect(sut(...make('m <-> r'))).toBe('(m -> r) ^ (r -> m)')
       expect(sut(...make('~m <-> ~r'))).toBe('(~m -> ~r) ^ (~r -> ~m)')
-      expect(sut(...make('m'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
   })
 
@@ -113,14 +112,16 @@ describe('actions', () => {
       const sut = makeSut('ad')
       expect(sut(...make('m', 'ad r em 1'))).toBe('m v r')
       expect(sut(...make('~m', '~r'))).toBe('~m v ~r')
-      expect(sut(...make('m -> r', 'r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m -> r', 'r'))).toThrow(InvalidActionError)
     })
 
     it('sim: should simplify conjunction', () => {
       const sut = makeSut('sim')
       expect(sut(...make('m ^ r -> m'))).toBe('m ^ r -> r')
       expect(sut(...make('~m ^ ~r -> ~r'))).toBe('~m ^ ~r -> ~m')
-      expect(sut(...make('m -> r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m -> r'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m ^ r', ''))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m ^ r', 's'))).toThrow(InvalidActionError)
 
       expect(sut(...make('m ^ r', 'm'))).toBe('m')
       expect(sut(...make('m ^ r', 'r'))).toBe('r')
@@ -132,17 +133,18 @@ describe('actions', () => {
       expect(sut(...make('m', 'm -> r'))).toBe('r')
       expect(sut(...make('m -> r', 'm'))).toBe('r')
       expect(sut(...make('m ^ r', 'm ^ r -> u'))).toBe('u')
-      expect(sut(...make('m', 'r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m', 'r'))).toThrow(InvalidActionError)
 
       expect(sut(...make('s', 's -> (r -> t)'))).toBe('r -> t')
     })
 
     it('mt: should return inverted assertion requirement', () => {
       const sut = makeSut('mt')
-      expect(sut(...make('~r', 'm -> r'))).toBe('~m')
       expect(sut(...make('m -> r', '~r'))).toBe('~m')
+      expect(sut(...make('~r', 'm -> r'))).toBe('~m')
+      expect(sut(...make('~m', 'm -> r'))).toBe('~r')
       expect(sut(...make('~m ^ ~r', 'u -> m ^ r'))).toBe('~u')
-      expect(sut(...make('m', 'r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m', 'r'))).toThrow(InvalidActionError)
 
       expect(sut(...make('~m', '~r -> m'))).toBe('~~r')
       expect(sut(...make('~m', 'p v ~q -> m'))).toBe('~(p v ~q)')
@@ -155,16 +157,16 @@ describe('actions', () => {
       expect(sut(...make('m v r', '~m'))).toBe('r')
       expect(sut(...make('m v r', '~r'))).toBe('m')
       expect(sut(...make('m', '~m v (~q v r)'))).toBe('~q v r')
-      expect(sut(...make('m', 'r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m', 'r'))).toThrow(InvalidActionError)
     })
 
     it('sh: should resolve chained conditions', () => {
       const sut = makeSut('sh')
       expect(sut(...make('m -> q', 'q -> r'))).toBe('m -> r')
       expect(sut(...make('q -> r', 'm -> q'))).toBe('m -> r')
-      expect(sut(...make('m v q', 's -> r'))).toBe(invalidActionMessage)
-      expect(sut(...make('m -> q', 's ^ r'))).toBe(invalidActionMessage)
-      expect(sut(...make('m -> q', 's -> r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('m v q', 's -> r'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m -> q', 's ^ r'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m -> q', 's -> r'))).toThrow(InvalidActionError)
     })
 
     it('dc: should resolve constructive dilema', () => {
@@ -174,10 +176,12 @@ describe('actions', () => {
       expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~p v ~r)'))).toBe('q v s')
       expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (~p v ~r)'))).toBe('~q v ~s')
       expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (~r v ~p)'))).toBe('~q v ~s')
-      expect(sut(...make('(p → q) ∧ (r → s) ∧ (~p v ~r)'))).toBe(
-        invalidActionMessage
+      expect(() => sut(...make('(p → q) ∧ (r → s) ∧ (~p v ~r)'))).toThrow(
+        InvalidActionError
       )
-      expect(sut(...make('(~p → ~q) ∧ (~p v ~r)'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('(~p → ~q) ∧ (~p v ~r)'))).toThrow(
+        InvalidActionError
+      )
     })
 
     it('dd: should resolve destructive dilema', () => {
@@ -186,10 +190,12 @@ describe('actions', () => {
       expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (q v s)'))).toBe('~~p v ~~r')
       expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~q v ~s)'))).toBe('~~p v ~~r')
       expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~s v ~q)'))).toBe('~~p v ~~r')
-      expect(sut(...make('(p → q) ∧ (r → s) ∧ (q v s)'))).toBe(
-        invalidActionMessage
+      expect(() => sut(...make('(p → q) ∧ (r → s) ∧ (q v s)'))).toThrow(
+        InvalidActionError
       )
-      expect(sut(...make('(~p → q) ∧ (~q v ~s)'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('(~p → q) ∧ (~q v ~s)'))).toThrow(
+        InvalidActionError
+      )
     })
 
     it('abs: should absorve logic condition', () => {
@@ -197,15 +203,15 @@ describe('actions', () => {
       expect(sut(...make('p -> q'))).toBe('p -> (p ^ q)')
       expect(sut(...make('p ^ t -> q'))).toBe('p ^ t -> (p ^ t ^ q)')
       expect(sut(...make('~(p ^ t) -> ~q'))).toBe('~(p ^ t) -> (~(p ^ t) ^ ~q)')
-      expect(sut(...make('p v q'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('p v q'))).toThrow(InvalidActionError)
     })
 
     it('conj: should create a conjunction', () => {
       const sut = makeSut('conj')
       expect(sut(...make('p', 'q'))).toBe('p ^ q')
       expect(sut(...make('~p', 'q'))).toBe('~p ^ q')
-      expect(sut(...make('p -> r', 'q'))).toBe(invalidActionMessage)
-      expect(sut(...make('p', 'q v r'))).toBe(invalidActionMessage)
+      expect(() => sut(...make('p -> r', 'q'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('p', 'q v r'))).toThrow(InvalidActionError)
     })
   })
 })

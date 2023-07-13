@@ -14,8 +14,6 @@ export const andSignal = '^'
 export const arrowSignal = '->'
 export const biArrowSignal = '<->'
 
-export const invalidActionMessage = 'Ação Inválida'
-
 export function clear(line: string): string {
   return line
     .toLowerCase()

@@ -11,3 +11,10 @@ export class MissingTargetLineError extends Error {
     this.name = 'MissingTargetLineError'
   }
 }
+
+export class InvalidActionError extends Error {
+  constructor() {
+    super('invalid action')
+    this.name = 'InvalidActionError'
+  }
+}
