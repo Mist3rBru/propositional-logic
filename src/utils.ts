@@ -1,5 +1,4 @@
-import { MissingTargetLineError } from './errors'
-
+export const letterRegex = /^~*[a-uw-z]$/
 export const arrowRegex = /(?:[-=]>)||→/
 export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
 export const orRegex = /∨|v|V/
@@ -56,7 +55,9 @@ export function group(...letters: string[]): string {
   const line = letters.join(' ')
   return /^~*\(/.test(line)
     ? /\)$/.test(line)
-      ? line
+      ? /\)./.test(line) && /.\(/.test(line)
+        ? `(${line})`
+        : line
       : /^~*\(.*?\).+/.test(line)
       ? `(${line})`
       : `${line})`
@@ -142,6 +143,14 @@ export function invertSignal(line: string): string {
   return line.replace(globalRegex(regex), signal)
 }
 
-export function getPrompt(lines: string[]): string {
+export function first(lines: string[]): string {
+  return lines[0]
+}
+
+export function last(lines: string[]): string {
   return lines[lines.length - 1]
+}
+
+export function targets(lines: string[], targetLines: number[]): string[] {
+  return targetLines.map(target => lines[target])
 }

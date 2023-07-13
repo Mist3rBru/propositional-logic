@@ -63,19 +63,23 @@ describe('actions', () => {
 
     it('dm: should invert/resolve group logic', () => {
       const sut = makeSut('dm')
-      expect(sut(...make('m ^ r'))).toBe('~(~m v ~r)')
-      expect(sut(...make('~m ^ ~r'))).toBe('~(m v r)')
-      expect(sut(...make('~(m v r)'))).toBe('~m ^ ~r')
-      expect(sut(...make('~(m v ~r)'))).toBe('~m ^ r')
-      expect(() => sut(...make('m'))).toThrow(InvalidActionError)
-      expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
+      expect(sut(...make('p ^ q'))).toBe('~(~p v ~q)')
+      expect(sut(...make('~p ^ ~q'))).toBe('~(p v q)')
+      expect(sut(...make('~(p v q)'))).toBe('~p ^ ~q')
+      expect(sut(...make('~(p v ~q)'))).toBe('~p ^ q')
+      expect(sut(...make('~(p v q v r)'))).toBe('~p ^ ~q ^ ~r')
+      expect(() => sut(...make('p'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('~~p'))).toThrow(InvalidActionError)
     })
 
     it('dis: should resolve distribution', () => {
       const sut = makeSut('dis')
-      expect(sut(...make('r ^ (~m v q)'))).toBe('(r ^ ~m) v (r ^ q)')
-      expect(sut(...make('(~m v q) ^ r'))).toBe('(r ^ ~m) v (r ^ q)')
-      expect(sut(...make('r v (m ^ q)'))).toBe('(r v m) ^ (r v q)')
+      expect(sut(...make('p ^ (~q v r)'))).toBe('(p ^ ~q) v (p ^ r)')
+      expect(sut(...make('(~p v q) ^ r'))).toBe('(r ^ ~p) v (r ^ q)')
+      expect(sut(...make('~p v (q ^ r)'))).toBe('(~p v q) ^ (~p v r)')
+      expect(sut(...make('p v (q ^ r ^ s)'))).toBe(
+        '(p v q) ^ (p v r) ^ (p v s)'
+      )
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
 
@@ -90,19 +94,23 @@ describe('actions', () => {
       expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
     })
 
-    it('cond: invert and switch condicional sides', () => {
+    it('cond: negate and switch condicional sides', () => {
       const sut = makeSut('cond')
-      expect(sut(...make('m -> r'))).toBe('~r -> ~m')
-      expect(sut(...make('~m -> ~r'))).toBe('~~r -> ~~m')
+      expect(sut(...make('p -> r'))).toBe('~r -> ~p')
+      expect(sut(...make('~p -> ~r'))).toBe('~~r -> ~~p')
+      expect(sut(...make('p -> q -> r'))).toBe('~r -> ~q -> ~p')
+      expect(sut(...make('p v r'))).toBe('~p -> r')
+      expect(sut(...make('p v q v r'))).toBe('~p -> (q v r)')
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
-
-      expect(sut(...make('~t v u'))).toBe('t -> u')
     })
 
     it('bi: should resolve distribution of bi direcional condicional', () => {
       const sut = makeSut('bi')
-      expect(sut(...make('m <-> r'))).toBe('(m -> r) ^ (r -> m)')
-      expect(sut(...make('~m <-> ~r'))).toBe('(~m -> ~r) ^ (~r -> ~m)')
+      expect(sut(...make('p <-> r'))).toBe('(p -> r) ^ (r -> p)')
+      expect(sut(...make('~p <-> ~r'))).toBe('(~p -> ~r) ^ (~r -> ~p)')
+      expect(sut(...make('p <-> q <-> r'))).toBe(
+        '(p -> q -> r) ^ (r -> q -> p)'
+      )
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
   })
@@ -162,8 +170,12 @@ describe('actions', () => {
 
     it('sh: should resolve chained conditions', () => {
       const sut = makeSut('sh')
+      expect(sut(...make('m -> q -> r'))).toBe('m -> r')
+      expect(sut(...make('m -> (q -> r)'))).toBe('m -> r')
       expect(sut(...make('m -> q', 'q -> r'))).toBe('m -> r')
       expect(sut(...make('q -> r', 'm -> q'))).toBe('m -> r')
+      expect(sut(...make('q -> m', 'm -> (r -> s)'))).toBe('q -> s')
+      expect(sut(...make('s -> p', 'm -> (r -> s)'))).toBe('m -> p')
       expect(() => sut(...make('m v q', 's -> r'))).toThrow(InvalidActionError)
       expect(() => sut(...make('m -> q', 's ^ r'))).toThrow(InvalidActionError)
       expect(() => sut(...make('m -> q', 's -> r'))).toThrow(InvalidActionError)
@@ -201,16 +213,20 @@ describe('actions', () => {
     it('abs: should absorve logic condition', () => {
       const sut = makeSut('abs')
       expect(sut(...make('p -> q'))).toBe('p -> (p ^ q)')
-      expect(sut(...make('p ^ t -> q'))).toBe('p ^ t -> (p ^ t ^ q)')
-      expect(sut(...make('~(p ^ t) -> ~q'))).toBe('~(p ^ t) -> (~(p ^ t) ^ ~q)')
+      expect(sut(...make('p ^ q -> r'))).toBe('p ^ q -> (p ^ q ^ r)')
+      expect(sut(...make('~(p ^ q) -> r'))).toBe('~(p ^ q) -> (~(p ^ q) ^ r)')
+      expect(sut(...make('~(p ^ q) -> (r -> s)'))).toBe(
+        '~(p ^ q) -> (~(p ^ q) ^ (r -> s))'
+      )
       expect(() => sut(...make('p v q'))).toThrow(InvalidActionError)
     })
 
     it('conj: should create a conjunction', () => {
       const sut = makeSut('conj')
       expect(sut(...make('p', 'q'))).toBe('p ^ q')
-      expect(sut(...make('~p', 'q'))).toBe('~p ^ q')
-      expect(() => sut(...make('p -> r', 'q'))).toThrow(InvalidActionError)
+      expect(sut(...make('p', 'q', 'r'))).toBe('p ^ q ^ r')
+      expect(sut(...make('~p', 'q', '~~r'))).toBe('~p ^ q ^ ~~r')
+      expect(() => sut(...make('p -> q', 'r'))).toThrow(InvalidActionError)
       expect(() => sut(...make('p', 'q v r'))).toThrow(InvalidActionError)
     })
   })

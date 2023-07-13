@@ -10,10 +10,13 @@ import {
   compare,
   doubleNotRegex,
   find,
+  first,
   globalRegex,
   group,
   groupRegex,
   invertSignal,
+  last,
+  letterRegex,
   mapNot,
   normalize,
   not,
@@ -24,11 +27,23 @@ import {
   prune,
   resolve,
   split,
+  targets,
   ungroup
 } from './utils'
 
 describe('utils', () => {
-  it('should catch simple arrows', () => {
+  it('should catch LETTER', () => {
+    expect(letterRegex.test('w')).toBeTruthy()
+    expect(letterRegex.test('~w')).toBeTruthy()
+    expect(letterRegex.test('~~w')).toBeTruthy()
+    expect(letterRegex.test('~~~w')).toBeTruthy()
+    expect(letterRegex.test('v')).toBeFalsy()
+    expect(letterRegex.test('^')).toBeFalsy()
+    expect(letterRegex.test('->')).toBeFalsy()
+    expect(letterRegex.test('()')).toBeFalsy()
+  })
+
+  it('should catch SIMPLE ARROW', () => {
     expect(arrowRegex.test('->')).toBeTruthy()
     expect(arrowRegex.test('=>')).toBeTruthy()
     expect(arrowRegex.test('')).toBeTruthy()
@@ -36,7 +51,7 @@ describe('utils', () => {
     expect(arrowRegex.test('>')).toBeFalsy()
   })
 
-  it('should catch bidirecional arrows', () => {
+  it('should catch BIDIRECIONAL ARROW', () => {
     expect(biArrowRegex.test('<->')).toBeTruthy()
     expect(biArrowRegex.test('<=>')).toBeTruthy()
     expect(biArrowRegex.test('<>')).toBeTruthy()
@@ -123,14 +138,16 @@ describe('utils', () => {
   })
 
   it('should add GROUP line', () => {
-    expect(group('q')).toBe('(q)')
-    expect(group('(q')).toBe('(q)')
-    expect(group('q)')).toBe('(q)')
-    expect(group('(q)')).toBe('(q)')
-    expect(group('qvr')).toBe('(qvr)')
-    expect(group('(qvr)')).toBe('(qvr)')
-    expect(group('~(qvr)')).toBe('~(qvr)')
-    expect(group('(qvr) v s')).toBe('((qvr) v s)')
+    expect(group('p')).toBe('(p)')
+    expect(group('(p')).toBe('(p)')
+    expect(group('p)')).toBe('(p)')
+    expect(group('(p)')).toBe('(p)')
+    expect(group('pvq')).toBe('(pvq)')
+    expect(group('(pvq)')).toBe('(pvq)')
+    expect(group('~(pvq)')).toBe('~(pvq)')
+    expect(group('(pvq) v r')).toBe('((pvq) v r)')
+    expect(group('(pvq) v (rvs)')).toBe('((pvq) v (rvs))')
+    expect(group('(pvq) v (rvs)')).toBe('((pvq) v (rvs))')
   })
 
   it('should RESOLVE line', () => {
@@ -195,5 +212,26 @@ describe('utils', () => {
     expect(invertSignal('q^r^s')).toBe('qvrvs')
     expect(invertSignal('qvr')).toBe('q^r')
     expect(invertSignal('qvrvs')).toBe('q^r^s')
+  })
+
+  it('should return FIRST item', () => {
+    expect(first(['p'])).toBe('p')
+    expect(first(['p', 'q'])).toBe('p')
+    expect(first(['p', 'q', 'r'])).toBe('p')
+  })
+
+  it('should return LAST item', () => {
+    expect(last(['p'])).toBe('p')
+    expect(last(['p', 'q'])).toBe('q')
+    expect(last(['p', 'q', 'r'])).toBe('r')
+  })
+
+  it('should return TARGETS', () => {
+    expect(targets(['p'], [])).toStrictEqual([])
+    expect(targets(['p'], [0])).toStrictEqual(['p'])
+    expect(targets(['p', 'q'], [0])).toStrictEqual(['p'])
+    expect(targets(['p', 'q'], [0, 1])).toStrictEqual(['p', 'q'])
+    expect(targets(['p', 'q', 'r'], [1, 2])).toStrictEqual(['q', 'r'])
+    expect(targets(['p', 'q', 'r'], [2])).toStrictEqual(['r'])
   })
 })

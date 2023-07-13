@@ -11,7 +11,7 @@ import {
   compare,
   doubleNotRegex,
   find,
-  getPrompt,
+  last,
   globalRegex,
   group,
   groupRegex,
@@ -25,7 +25,10 @@ import {
   prune,
   resolve,
   split,
-  ungroup
+  ungroup,
+  first,
+  targets,
+  letterRegex
 } from './utils'
 
 /**
@@ -183,21 +186,21 @@ export function dis(lines: string[], targetLines: number[]): string {
       .join('')
   }
 
-  const outerSignal = target.replace(/.+?\)(.).+/, '$1')
+  const innerSignal = target.replace(/^\(~*\w(.).+/, '$1')
+  const outerSignal = target.replace(/^.+?\)(.).+/, '$1')
+
+  const outerLetter = target.replace(/.+?(~*\w)$/, '$1')
   const innerLetters = target
     .replace(groupRegex, '$1')
-    .replace(/[()]/g, '')
-    .replace(orRegex, ' ')
-    .replace(andRegex, ' ')
+    .replace(globalRegex(orRegex), ' ')
+    .replace(globalRegex(andRegex), ' ')
+    .replace(outerLetter, '')
     .split(' ')
-
-  const innerSignal = target.replace(/\(~{0,}\w(.).+/, '$1')
-  const outerLetter = target.charAt(target.length - 1)
+    .filter(Boolean)
+    .map(ungroup)
 
   return normalize(
-    group(outerLetter, outerSignal, innerLetters[0]),
-    innerSignal,
-    group(outerLetter, outerSignal, innerLetters[1])
+    innerLetters.map(l => group(outerLetter, outerSignal, l)).join(innerSignal)
   )
 }
 
@@ -243,13 +246,17 @@ export function cond(lines: string[], targetLines: number[]): string {
   const target = prune(lines[targetLines[0]])
   if (arrowRegex.test(target)) {
     return normalize(
-      split(target, arrowRegex).reverse().map(not).join(arrowSignal)
+      target.split(globalRegex(arrowRegex)).reverse().map(not).join(arrowSignal)
     )
   }
 
   if (orRegex.test(target)) {
     const orLetters = split(target, orRegex)
-    return normalize(resolve(not(orLetters[0])), arrowSignal, orLetters[1])
+    return normalize(
+      resolve(not(orLetters[0])),
+      arrowSignal,
+      letterRegex.test(orLetters[1]) ? orLetters[1] : group(orLetters[1])
+    )
   }
 
   throw new InvalidActionError()
@@ -271,11 +278,11 @@ export function bi(lines: string[], targetLines: number[]): string {
     throw new InvalidActionError()
   }
 
-  const letters = split(target, biArrowRegex)
+  const parts = target.split(globalRegex(biArrowRegex))
   return normalize(
-    group(letters[0], arrowSignal, letters[1]),
+    group(parts.join(arrowSignal)),
     andSignal,
-    group(letters[1], arrowSignal, letters[0])
+    group(parts.reverse().join(arrowSignal))
   )
 }
 
@@ -291,11 +298,11 @@ export function ad(lines: string[], targetLines: number[]): string {
   }
 
   const target = prune(lines[targetLines[0]])
-  if (!/^~{0,}\w$/.test(target)) {
+  if (!letterRegex.test(target)) {
     throw new InvalidActionError()
   }
 
-  const newLetter = getPrompt(lines).replace(/^.{3}([^\s]+).+/, '$1')
+  const newLetter = last(lines).replace(/^.{3}([^\s]+).+/, '$1')
   return normalize(target, orSignal, newLetter)
 }
 
@@ -318,7 +325,7 @@ export function sim(lines: string[], targetLines: number[]): string {
   }
 
   if (andRegex.test(target)) {
-    const desiredLetter = getPrompt(lines).replace(/^.{4}([^\s]+).+/, '$1')
+    const desiredLetter = last(lines).replace(/^.{4}([^\s]+).+/, '$1')
     if (!desiredLetter) {
       throw new InvalidActionError()
     }
@@ -418,26 +425,34 @@ export function sd(lines: string[], targetLines: number[]): string {
  * //If p then q; if q then r; therefore, if p then r
  */
 export function sh(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 2) {
+  if (targetLines.length < 1) {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
-  const target1 = lines[targetLines[0]]
-  const target2 = lines[targetLines[1]]
-  if (!arrowRegex.test(target1) || !arrowRegex.test(target2)) {
-    throw new InvalidActionError()
+  if (targetLines.length === 1 && arrowRegex.test(lines[targetLines[0]])) {
+    const target = lines[targetLines[0]]
+      .split(globalRegex(arrowRegex))
+      .map(clear)
+      .map(ungroup)
+    return normalize(first(target), arrowSignal, last(target))
   }
 
-  const parts = split(target1, arrowRegex)
-    .concat(split(target2, arrowRegex))
-    .map(clear)
+  if (
+    targetLines.length === 2 &&
+    arrowRegex.test(lines[targetLines[0]]) &&
+    arrowRegex.test(lines[targetLines[1]])
+  ) {
+    const [target1, target2] = targets(lines, targetLines).map(target =>
+      target.split(globalRegex(arrowRegex)).map(clear).map(ungroup)
+    )
+    if (compare(last(target1), first(target2))) {
+      return normalize(first(target1), arrowSignal, last(target2))
+    }
+    if (compare(first(target1), last(target2))) {
+      return normalize(first(target2), arrowSignal, last(target1))
+    }
+  }
 
-  if (compare(parts[1], parts[2])) {
-    return normalize(parts[0], arrowSignal, parts[3])
-  }
-  if (compare(parts[0], parts[3])) {
-    return normalize(parts[2], arrowSignal, parts[1])
-  }
   throw new InvalidActionError()
 }
 
@@ -452,26 +467,33 @@ export function dc(lines: string[], targetLines: number[]): string {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
-  const target = lines[targetLines[0]]
+  const groups = lines[targetLines[0]]
     .split(globalRegex(andRegex))
     .map(clear)
     .map(ungroup)
-  if (target.length !== 3) {
+  if (groups.length !== 3) {
     throw new InvalidActionError()
   }
-  const orIndex = target.findIndex(t => orRegex.test(t))
-  const conditionalStates = target.filter((_, i) => i !== orIndex)
-  const orLetters = split(target[orIndex], orRegex)
-  const results = conditionalStates
+
+  const orGroupIndex = groups.findIndex(g => orRegex.test(g))
+  const conditionalGroups = groups.filter((_, i) => i !== orGroupIndex)
+  const orLetters = split(groups[orGroupIndex], orRegex)
+  const conditionalLetters = conditionalGroups
     .map(c => split(c, arrowRegex))
     .flat()
     .map(clear)
 
-  if (compare(results[0], orLetters[0]) && compare(results[2], orLetters[1])) {
-    return normalize(results[1], orSignal, results[3])
+  if (
+    compare(conditionalLetters[0], orLetters[0]) &&
+    compare(conditionalLetters[2], orLetters[1])
+  ) {
+    return normalize(conditionalLetters[1], orSignal, conditionalLetters[3])
   }
-  if (compare(results[0], orLetters[1]) && compare(results[2], orLetters[0])) {
-    return normalize(results[1], orSignal, results[3])
+  if (
+    compare(conditionalLetters[0], orLetters[1]) &&
+    compare(conditionalLetters[2], orLetters[0])
+  ) {
+    return normalize(conditionalLetters[1], orSignal, conditionalLetters[3])
   }
   throw new InvalidActionError()
 }
@@ -494,20 +516,26 @@ export function dd(lines: string[], targetLines: number[]): string {
   if (target.length !== 3) {
     throw new InvalidActionError()
   }
-  const orIndex = target.findIndex(t => orRegex.test(t))
-  const conditionalStates = target.filter((_, i) => i !== orIndex)
-  const orLetters = split(target[orIndex], orRegex)
-  const results = conditionalStates
+  const orGroupIndex = target.findIndex(t => orRegex.test(t))
+  const conditionalGroups = target.filter((_, i) => i !== orGroupIndex)
+  const orLetters = split(target[orGroupIndex], orRegex)
+  const conditionalLetters = conditionalGroups
     .map(c => split(c, arrowRegex))
     .flat()
     .map(clear)
     .map(not)
 
-  if (compare(results[1], orLetters[0]) && compare(results[3], orLetters[1])) {
-    return normalize(results[0], orSignal, results[2])
+  if (
+    compare(conditionalLetters[1], orLetters[0]) &&
+    compare(conditionalLetters[3], orLetters[1])
+  ) {
+    return normalize(conditionalLetters[0], orSignal, conditionalLetters[2])
   }
-  if (compare(results[1], orLetters[1]) && compare(results[3], orLetters[0])) {
-    return normalize(results[0], orSignal, results[2])
+  if (
+    compare(conditionalLetters[1], orLetters[1]) &&
+    compare(conditionalLetters[3], orLetters[0])
+  ) {
+    return normalize(conditionalLetters[0], orSignal, conditionalLetters[2])
   }
   throw new InvalidActionError()
 }
@@ -546,11 +574,10 @@ export function conj(lines: string[], targetLines: number[]): string {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
-  const target = [lines[targetLines[0]], lines[targetLines[1]]]
-  const letterRegex = /^~{0,}\w$/
-  if (!letterRegex.test(target[0]) || !letterRegex.test(target[1])) {
+  const target = targets(lines, targetLines).map(prune)
+  if (target.filter(t => letterRegex.test(t)).length !== target.length) {
     throw new InvalidActionError()
   }
 
-  return normalize(target[0], andSignal, target[1])
+  return normalize(target.join(andSignal))
 }
