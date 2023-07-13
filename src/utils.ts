@@ -1,10 +1,10 @@
 export const letterRegex = /^~*[a-uw-z]$/
-export const arrowRegex = /(?:[-=]>)||→/
+export const arrowRegex = /(?:[-=]>)|(?:−)||→/
 export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
 export const orRegex = /∨|v|V/
 export const andRegex = /\^|∧/
 export const groupRegex = /^\((.*?)\)$/
-export const notGroupRegex = /^~\((.*?)\)$/
+export const notGroupRegex = /^~\(([^)]*)\)$/
 export const notRegex = /~/
 export const doubleNotRegex = /~{2}/
 
@@ -44,37 +44,39 @@ export function mapNot(line: string): string {
 }
 
 export function ungroup(line: string): string {
-  return groupRegex.test(line)
+  const f = first(line)
+  const l = last(line)
+  return groupRegex.test(line) && !/.+\).+/.test(line)
     ? line.replace(groupRegex, '$1')
-    : /(?:^\()|(?:^[^~].*\))$/.test(line)
-    ? line.replace(/^\(/, '').replace(/\)$/, '')
+    : f === '(' && l !== ')'
+    ? line.slice(1)
+    : f !== '~' && l === ')' && !/.+\(.+/.test(line)
+    ? line.slice(0, line.length - 1)
     : line
 }
 
 export function group(...letters: string[]): string {
   const line = letters.join(' ')
-  return /^~*\(/.test(line)
-    ? /\)$/.test(line)
-      ? /\)./.test(line) && /.\(/.test(line)
-        ? `(${line})`
-        : line
-      : /^~*\(.*?\).+/.test(line)
+  return /^~*\(.+\)$/.test(line)
+    ? /.+\).+/.test(line)
       ? `(${line})`
-      : `${line})`
+      : line
+    : /^~*\([^)]+$/.test(line)
+    ? `${line})`
     : /\)$/.test(line)
     ? `(${line}`
     : `(${line})`
 }
 
 export function resolve(line: string): string {
-  if (notGroupRegex.test(line)) {
-    const content = line.replace(notGroupRegex, '$1')
-    line = mapNot(content)
+  let result = line
+  if (notGroupRegex.test(result)) {
+    result = mapNot(result.replace(notGroupRegex, '$1'))
   }
-  if (doubleNotRegex.test(line)) {
-    line = line.replace(globalRegex(doubleNotRegex), '')
+  if (doubleNotRegex.test(result)) {
+    result = result.replace(globalRegex(doubleNotRegex), '')
   }
-  return ungroup(line)
+  return ungroup(result)
 }
 
 export function prune(line: string): string {
@@ -106,8 +108,8 @@ export function split(line: string, regex: RegExp): [string, string] {
 export function compare(...cases: string[]): boolean {
   return (
     cases
-      .map(resolve)
       .map(prune)
+      .map(resolve)
       .filter((c, i, ar) => c === ar[0]).length === cases.length
   )
 }
@@ -137,17 +139,28 @@ export function catchSignal(line: string): [regex: RegExp, signal: string] {
 }
 
 export function invertSignal(line: string): string {
-  const [regex, signal] = orRegex.test(line)
-    ? [orRegex, andSignal]
-    : [andRegex, orSignal]
-  return line.replace(globalRegex(regex), signal)
+  let invertedStr = ''
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+
+    if (orRegex.test(char)) {
+      invertedStr += andSignal
+    } else if (andRegex.test(char)) {
+      invertedStr += orSignal
+    } else {
+      invertedStr += char
+    }
+  }
+
+  return invertedStr
 }
 
-export function first(lines: string[]): string {
+export function first(lines: string | string[]): string {
   return lines[0]
 }
 
-export function last(lines: string[]): string {
+export function last(lines: string | string[]): string {
   return lines[lines.length - 1]
 }
 

@@ -146,15 +146,21 @@ export function dm(lines: string[], targetLines: number[]): string {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
-  const target = invertSignal(lines[targetLines[0]])
-  if (target.length <= 3) {
+  const [target] = targets(lines, targetLines).map(invertSignal)
+  if (letterRegex.test(target)) {
     throw new InvalidActionError()
   }
 
-  const isNotGroup = notGroupRegex.test(target)
-  return isNotGroup
-    ? normalize(resolve(target))
-    : normalize(mapNot(group(target)).replace(/~{2}/g, ''))
+  const result = target
+    .split(arrowRegex)
+    .map(prune)
+    .map(g =>
+      notGroupRegex.test(g) ? g.replace(notGroupRegex, '$1') : mapNot(g)
+    )
+    .map(g => group(g))
+    .join(arrowSignal)
+
+  return normalize(resolve(result))
 }
 
 /**
@@ -205,6 +211,7 @@ export function dis(lines: string[], targetLines: number[]): string {
 }
 
 /**
+ * Implication
  * @example
  * cp(['p -> q'],[0])//'~p -> ~q'
  * //If p then q is equiv. to if not p then not q
@@ -223,9 +230,11 @@ export function cp(lines: string[], targetLines: number[]): string {
   const result = split(target, signalRegex)
     .map(clear)
     .map(part => {
-      return groupRegex.test(part) || notGroupRegex.test(part)
+      return groupRegex.test(part) ||
+        notGroupRegex.test(part) ||
+        letterRegex.test(part)
         ? not(part)
-        : mapNot(part)
+        : not(group(part))
     })
     .join(signal)
 
@@ -287,6 +296,27 @@ export function bi(lines: string[], targetLines: number[]): string {
 }
 
 /**
+ * Inversion
+ * @example
+ * inv(['p v q'],[0, 1])//'q v p'
+ * //If p or q; therefore q or p
+ */
+export function inv(lines: string[], targetLines: number[]): string {
+  if (targetLines.length < 1) {
+    throw new MissingTargetLineError(targetLines.length, 2)
+  }
+
+  const [target] = targets(lines, targetLines)
+  const [signalRegex, signal] = catchSignal(target)
+  const result = resolve(target)
+    .split(globalRegex(signalRegex))
+    .reverse()
+    .join(signal)
+
+  return normalize(result)
+}
+
+/**
  * Addition
  * @example
  * ad(['p', 'q'],[0])//'p v q'
@@ -311,7 +341,7 @@ export function sim(lines: string[], targetLines: number[]): string {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
-  const target = lines[targetLines[0]]
+  const target = prune(lines[targetLines[0]])
 
   if (arrowRegex.test(target) && andRegex.test(target)) {
     const [andCondition, result] = split(target, arrowRegex).map(clear)
@@ -329,7 +359,8 @@ export function sim(lines: string[], targetLines: number[]): string {
     if (!desiredLetter) {
       throw new InvalidActionError()
     }
-    const andLetters = target.split(andRegex).map(prune)
+
+    const andLetters = split(resolve(target), andRegex).map(resolve).map(prune)
     if (!andLetters.includes(desiredLetter)) {
       throw new InvalidActionError()
     }
@@ -357,7 +388,7 @@ export function mp(lines: string[], targetLines: number[]): string {
     lines[targetLines[1]]
   )
   const [requirement, ...result] = condition.split(arrowRegex).map(clear)
-  if (!compare(data, requirement)) {
+  if (!compare(resolve(data), resolve(requirement))) {
     throw new InvalidActionError()
   }
 

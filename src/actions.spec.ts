@@ -63,11 +63,13 @@ describe('actions', () => {
 
     it('dm: should invert/resolve group logic', () => {
       const sut = makeSut('dm')
-      expect(sut(...make('p ^ q'))).toBe('~(~p v ~q)')
-      expect(sut(...make('~p ^ ~q'))).toBe('~(p v q)')
-      expect(sut(...make('~(p v q)'))).toBe('~p ^ ~q')
-      expect(sut(...make('~(p v ~q)'))).toBe('~p ^ q')
-      expect(sut(...make('~(p v q v r)'))).toBe('~p ^ ~q ^ ~r')
+      expect(sut(...make('p ^ q'))).toBe('~p v ~q')
+      expect(sut(...make('~p ^ ~q'))).toBe('p v q')
+      expect(sut(...make('~(p v q)'))).toBe('p ^ q')
+      expect(sut(...make('~(p v ~q)'))).toBe('p ^ ~q')
+      expect(sut(...make('~(p v ~q v r)'))).toBe('p ^ ~q ^ r')
+      expect(sut(...make('~(p v q) -> ~(r ^ s)'))).toBe('(p ^ q) -> (r v s)'
+      )
       expect(() => sut(...make('p'))).toThrow(InvalidActionError)
       expect(() => sut(...make('~~p'))).toThrow(InvalidActionError)
     })
@@ -88,8 +90,9 @@ describe('actions', () => {
       expect(sut(...make('m -> r'))).toBe('~m -> ~r')
       expect(sut(...make('m v r'))).toBe('~m v ~r')
       expect(sut(...make('m ^ r'))).toBe('~m ^ ~r')
-      expect(sut(...make('m ^ r -> u'))).toBe('~m ^ ~r -> ~u')
+      expect(sut(...make('m ^ r -> u'))).toBe('~(m ^ r) -> ~u')
       expect(sut(...make('~(m ^ r) -> u'))).toBe('~~(m ^ r) -> ~u')
+      expect(sut(...make('p v q → (r ^ s)'))).toBe('~(p v q) -> ~(r ^ s)')
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
       expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
     })
@@ -113,6 +116,14 @@ describe('actions', () => {
       )
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
     })
+
+    it('inv: should invert positions', () => {
+      const sut = makeSut('inv')
+      expect(sut(...make('p -> r'))).toBe('r -> p')
+      expect(sut(...make('p v r'))).toBe('r v p')
+      expect(sut(...make('p ^ r'))).toBe('r ^ p')
+      expect(sut(...make('~(~s ^ ~t)'))).toBe('t ^ s')
+    })
   })
 
   describe('inference', () => {
@@ -127,13 +138,15 @@ describe('actions', () => {
       const sut = makeSut('sim')
       expect(sut(...make('m ^ r -> m'))).toBe('m ^ r -> r')
       expect(sut(...make('~m ^ ~r -> ~r'))).toBe('~m ^ ~r -> ~m')
-      expect(() => sut(...make('m -> r'))).toThrow(InvalidActionError)
-      expect(() => sut(...make('m ^ r', ''))).toThrow(InvalidActionError)
-      expect(() => sut(...make('m ^ r', 's'))).toThrow(InvalidActionError)
 
       expect(sut(...make('m ^ r', 'm'))).toBe('m')
       expect(sut(...make('m ^ r', 'r'))).toBe('r')
-      expect(sut(...make('m ^ ~(t v q)', 'sim ~(tvq) 1'))).toBe('~(t v q)')
+      expect(sut(...make('m ^ ~(t v q)', 'sim ~tv~q 1'))).toBe('~t v ~q')
+      expect(sut(...make('~(m ^ r)', '~m'))).toBe('~m')
+
+      expect(() => sut(...make('m -> r'))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m ^ r', ''))).toThrow(InvalidActionError)
+      expect(() => sut(...make('m ^ r', 's'))).toThrow(InvalidActionError)
     })
 
     it('mp: should return assertion result', () => {
@@ -141,9 +154,9 @@ describe('actions', () => {
       expect(sut(...make('m', 'm -> r'))).toBe('r')
       expect(sut(...make('m -> r', 'm'))).toBe('r')
       expect(sut(...make('m ^ r', 'm ^ r -> u'))).toBe('u')
-      expect(() => sut(...make('m', 'r'))).toThrow(InvalidActionError)
-
+      expect(sut(...make('~p ^ q', '~(p ^ ~q) -> ~(r v s)'))).toBe('~(r v s)')
       expect(sut(...make('s', 's -> (r -> t)'))).toBe('r -> t')
+      expect(() => sut(...make('m', 'r'))).toThrow(InvalidActionError)
     })
 
     it('mt: should return inverted assertion requirement', () => {
