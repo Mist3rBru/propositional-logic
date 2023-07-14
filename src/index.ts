@@ -1,6 +1,6 @@
 import * as LogicActions from './actions'
 import * as LogicErrors from './errors'
-import { clear } from './utils'
+import { clear, normalize } from './utils'
 
 export * from './actions'
 export * from './errors'
@@ -14,7 +14,7 @@ export function resolve<T extends string | string[]>(
   throwOnError: boolean = true
 ): T {
   if (Array.isArray(lines)) {
-    const result = Array.from(solvedLines)
+    const result = Array.from(solvedLines).map(g => normalize(g))
     for (const unsolvedLine of lines) {
       result.push(resolve(unsolvedLine, result, throwOnError))
     }
@@ -41,5 +41,12 @@ export function resolve<T extends string | string[]>(
     return new LogicErrors.InvalidLineError(notFoundLine + 1).message as T
   }
 
-  return LogicActions[action](solvedLines.concat([line]), targetLines) as T
+  try {
+    return LogicActions[action](solvedLines.concat([line]), targetLines) as T
+  } catch (error) {
+    if(throwOnError) {
+      throw error
+    }
+    return error.message
+  }
 }

@@ -11,16 +11,16 @@ import {
   doubleNotRegex,
   find,
   first,
-  globalRegex,
+  global,
   group,
-  groupRegex,
+  strictGroupRegex,
   invertSignal,
   last,
-  letterRegex,
+  strictLetterRegex,
   mapNot,
   normalize,
   not,
-  notGroupRegex,
+  strictNotGroupRegex,
   notRegex,
   orRegex,
   orSignal,
@@ -33,14 +33,14 @@ import {
 
 describe('utils', () => {
   it('should catch LETTER', () => {
-    expect(letterRegex.test('w')).toBeTruthy()
-    expect(letterRegex.test('~w')).toBeTruthy()
-    expect(letterRegex.test('~~w')).toBeTruthy()
-    expect(letterRegex.test('~~~w')).toBeTruthy()
-    expect(letterRegex.test('v')).toBeFalsy()
-    expect(letterRegex.test('^')).toBeFalsy()
-    expect(letterRegex.test('->')).toBeFalsy()
-    expect(letterRegex.test('()')).toBeFalsy()
+    expect(strictLetterRegex.test('w')).toBeTruthy()
+    expect(strictLetterRegex.test('~w')).toBeTruthy()
+    expect(strictLetterRegex.test('~~w')).toBeTruthy()
+    expect(strictLetterRegex.test('~~~w')).toBeTruthy()
+    expect(strictLetterRegex.test('v')).toBeFalsy()
+    expect(strictLetterRegex.test('^')).toBeFalsy()
+    expect(strictLetterRegex.test('->')).toBeFalsy()
+    expect(strictLetterRegex.test('()')).toBeFalsy()
   })
 
   it('should catch SIMPLE ARROW', () => {
@@ -71,15 +71,15 @@ describe('utils', () => {
   })
 
   it('should catch GROUP', () => {
-    expect(groupRegex.test('()')).toBeTruthy()
-    expect(groupRegex.test('(qvr)')).toBeTruthy()
+    expect(strictGroupRegex.test('()')).toBeTruthy()
+    expect(strictGroupRegex.test('(qvr)')).toBeTruthy()
   })
 
   it('should catch NOT GROUP', () => {
-    expect(notGroupRegex.test('~()')).toBeTruthy()
-    expect(notGroupRegex.test('~(qvr)')).toBeTruthy()
-    expect(notGroupRegex.test('()')).not.toBeTruthy()
-    expect(notGroupRegex.test('(qvr)')).not.toBeTruthy()
+    expect(strictNotGroupRegex.test('~()')).toBeTruthy()
+    expect(strictNotGroupRegex.test('~(qvr)')).toBeTruthy()
+    expect(strictNotGroupRegex.test('()')).not.toBeTruthy()
+    expect(strictNotGroupRegex.test('(qvr)')).not.toBeTruthy()
   })
 
   it('should catch NOT signal', () => {
@@ -146,10 +146,11 @@ describe('utils', () => {
     expect(group('p)')).toBe('(p)')
     expect(group('(p)')).toBe('(p)')
     expect(group('pvq')).toBe('(pvq)')
+    expect(group('~pv~q')).toBe('(~pv~q)')
     expect(group('(pvq)')).toBe('(pvq)')
     expect(group('~(pvq)')).toBe('~(pvq)')
     expect(group('(pvq) v r')).toBe('((pvq) v r)')
-    expect(group('(pvq) v (rvs)')).toBe('((pvq) v (rvs))')
+    expect(group('(pvq) v rvs')).toBe('((pvq) v rvs)')
     expect(group('(pvq) v (rvs)')).toBe('((pvq) v (rvs))')
     expect(group('pvq) v (rvs')).toBe('(pvq) v (rvs)')
   })
@@ -178,12 +179,12 @@ describe('utils', () => {
   })
 
   it('should COMPARE cases', () => {
-    // expect(compare('(q v r)', '(qvr)')).toBeTruthy()
-    // expect(compare('(qvr)', 'qvr')).toBeTruthy()
-    // expect(compare('qvr)', '(qvr')).toBeTruthy()
-    // expect(compare('~(qvr)', '(~qv~r)')).toBeTruthy()
-    // expect(compare('~~(qvr)', 'qvr')).toBeTruthy()
-    // expect(compare('(qvr) ', '~(qvr)')).toBeFalsy()
+    expect(compare('(q v r)', '(qvr)')).toBeTruthy()
+    expect(compare('(qvr)', 'qvr')).toBeTruthy()
+    expect(compare('qvr)', '(qvr')).toBeTruthy()
+    expect(compare('~(qvr)', '(~qv~r)')).toBeTruthy()
+    expect(compare('~~(qvr)', 'qvr')).toBeTruthy()
+    expect(compare('(qvr) ', '~(qvr)')).toBeFalsy()
   })
 
   it('should FIND regex case', () => {
@@ -194,8 +195,8 @@ describe('utils', () => {
   it('should make regex GLOBAL', () => {
     const sut = /test/
     expect(sut.global).toBeFalsy()
-    expect(globalRegex(sut).global).toBeTruthy()
-    expect(globalRegex(globalRegex(sut)).global).toBeTruthy()
+    expect(global(sut).global).toBeTruthy()
+    expect(global(global(sut)).global).toBeTruthy()
   })
 
   it('should CATCH SIGNAL', () => {

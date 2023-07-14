@@ -63,13 +63,14 @@ describe('actions', () => {
 
     it('dm: should invert/resolve group logic', () => {
       const sut = makeSut('dm')
-      expect(sut(...make('p ^ q'))).toBe('~p v ~q')
-      expect(sut(...make('~p ^ ~q'))).toBe('p v q')
-      expect(sut(...make('~(p v q)'))).toBe('p ^ q')
-      expect(sut(...make('~(p v ~q)'))).toBe('p ^ ~q')
-      expect(sut(...make('~(p v ~q v r)'))).toBe('p ^ ~q ^ r')
-      expect(sut(...make('~(p v q) -> ~(r ^ s)'))).toBe('(p ^ q) -> (r v s)'
-      )
+      expect(sut(...make('~(a ^ b)'))).toBe('~a v ~b')
+      expect(sut(...make('~a v ~b'))).toBe('~(a ^ b)')
+      expect(sut(...make('(~a v b)'))).toBe('~(a ^ ~b)')
+      expect(sut(...make('~a ^ b'))).toBe('~(a v ~b)')
+      expect(sut(...make('~(a ^ b ^ c)'))).toBe('~a v ~b v ~c')
+      expect(sut(...make('~(a v b) ^ ~(c v d)'))).toBe('(~a ^ ~b) v (~c ^ ~d)')
+      expect(sut(...make('~(p v q) -> ~(r ^ s)'))).toBe('(~p ^ ~q) -> (~r v ~s)')
+      expect(sut(...make('(~a v ~b) ^ (~c v ~d)'))).toBe('~(a ^ b) v ~(c ^ d)')
       expect(() => sut(...make('p'))).toThrow(InvalidActionError)
       expect(() => sut(...make('~~p'))).toThrow(InvalidActionError)
     })
@@ -92,6 +93,7 @@ describe('actions', () => {
       expect(sut(...make('m ^ r'))).toBe('~m ^ ~r')
       expect(sut(...make('m ^ r -> u'))).toBe('~(m ^ r) -> ~u')
       expect(sut(...make('~(m ^ r) -> u'))).toBe('~~(m ^ r) -> ~u')
+      expect(sut(...make('~(~p ^ ~r)'))).toBe('~p ^ ~r')
       expect(sut(...make('p v q → (r ^ s)'))).toBe('~(p v q) -> ~(r ^ s)')
       expect(() => sut(...make('m'))).toThrow(InvalidActionError)
       expect(() => sut(...make('~~m'))).toThrow(InvalidActionError)
@@ -196,29 +198,29 @@ describe('actions', () => {
 
     it('dc: should resolve constructive dilema', () => {
       const sut = makeSut('dc')
-      expect(sut(...make('(p → q) ∧ (r → s) ∧ (p v r)'))).toBe('q v s')
-      expect(sut(...make('(p → ~q) ∧ (r → ~s) ∧ (p v r)'))).toBe('~q v ~s')
-      expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~p v ~r)'))).toBe('q v s')
-      expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (~p v ~r)'))).toBe('~q v ~s')
-      expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (~r v ~p)'))).toBe('~q v ~s')
-      expect(() => sut(...make('(p → q) ∧ (r → s) ∧ (~p v ~r)'))).toThrow(
+      expect(sut(...make('(p → q) ^ (r → s) ^ (p v r)'))).toBe('q v s')
+      expect(sut(...make('(p → ~q) ^ (r → ~s) ^ (p v r)'))).toBe('~q v ~s')
+      expect(sut(...make('(~p → q) ^ (~r → s) ^ (~p v ~r)'))).toBe('q v s')
+      expect(sut(...make('(~p → ~q) ^ (~r → ~s) ^ (~p v ~r)'))).toBe('~q v ~s')
+      expect(sut(...make('(~p → ~q) ^ (~r → ~s) ^ (~r v ~p)'))).toBe('~q v ~s')
+      expect(() => sut(...make('(p → q) ^ (r → s) ^ (~p v ~r)'))).toThrow(
         InvalidActionError
       )
-      expect(() => sut(...make('(~p → ~q) ∧ (~p v ~r)'))).toThrow(
+      expect(() => sut(...make('(~p → ~q) ^ (~p v ~r)'))).toThrow(
         InvalidActionError
       )
     })
 
     it('dd: should resolve destructive dilema', () => {
       const sut = makeSut('dd')
-      expect(sut(...make('(p → q) ∧ (r → s) ∧ (~q v ~s)'))).toBe('~p v ~r')
-      expect(sut(...make('(~p → ~q) ∧ (~r → ~s) ∧ (q v s)'))).toBe('~~p v ~~r')
-      expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~q v ~s)'))).toBe('~~p v ~~r')
-      expect(sut(...make('(~p → q) ∧ (~r → s) ∧ (~s v ~q)'))).toBe('~~p v ~~r')
-      expect(() => sut(...make('(p → q) ∧ (r → s) ∧ (q v s)'))).toThrow(
+      expect(sut(...make('(p → q) ^ (r → s) ^ (~q v ~s)'))).toBe('~p v ~r')
+      expect(sut(...make('(~p → ~q) ^ (~r → ~s) ^ (q v s)'))).toBe('~~p v ~~r')
+      expect(sut(...make('(~p → q) ^ (~r → s) ^ (~q v ~s)'))).toBe('~~p v ~~r')
+      expect(sut(...make('(~p → q) ^ (~r → s) ^ (~s v ~q)'))).toBe('~~p v ~~r')
+      expect(() => sut(...make('(p → q) ^ (r → s) ^ (q v s)'))).toThrow(
         InvalidActionError
       )
-      expect(() => sut(...make('(~p → q) ∧ (~q v ~s)'))).toThrow(
+      expect(() => sut(...make('(~p → q) ^ (~q v ~s)'))).toThrow(
         InvalidActionError
       )
     })

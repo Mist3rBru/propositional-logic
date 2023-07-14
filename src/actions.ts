@@ -12,14 +12,14 @@ import {
   doubleNotRegex,
   find,
   last,
-  globalRegex,
+  global,
   group,
-  groupRegex,
+  strictGroupRegex,
   invertSignal,
   mapNot,
   normalize,
   not,
-  notGroupRegex,
+  strictNotGroupRegex,
   orRegex,
   orSignal,
   prune,
@@ -28,7 +28,7 @@ import {
   ungroup,
   first,
   targets,
-  letterRegex
+  strictLetterRegex
 } from './utils'
 
 /**
@@ -146,21 +146,30 @@ export function dm(lines: string[], targetLines: number[]): string {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
-  const [target] = targets(lines, targetLines).map(invertSignal)
-  if (letterRegex.test(target)) {
+  const [target] = targets(lines, targetLines).map(invertSignal).map(prune)
+  if (strictLetterRegex.test(target)) {
     throw new InvalidActionError()
   }
 
-  const result = target
-    .split(arrowRegex)
-    .map(prune)
-    .map(g =>
-      notGroupRegex.test(g) ? g.replace(notGroupRegex, '$1') : mapNot(g)
-    )
-    .map(g => group(g))
-    .join(arrowSignal)
+  const dmMap = (groups: string[]): string[] => {
+    return groups.map(g => {
+      return strictNotGroupRegex.test(g)
+        ? resolve(g)
+        : mapNot(group(g)).replace(global(doubleNotRegex), '')
+    })
+  }
 
-  return normalize(resolve(result))
+  const offGroupSignalRegex = /^[^)]+\)([^~(]+)~*\(.+/
+  const offGroupSignal = target.replace(offGroupSignalRegex, '$1')
+  const isMultiGroup = offGroupSignalRegex.test(target)
+
+  const result = isMultiGroup
+    ? dmMap(target.split(offGroupSignal))
+        .map(g => group(g))
+        .join(offGroupSignal)
+    : dmMap([target]).join('')
+
+  return normalize(result)
 }
 
 /**
@@ -197,9 +206,9 @@ export function dis(lines: string[], targetLines: number[]): string {
 
   const outerLetter = target.replace(/.+?(~*\w)$/, '$1')
   const innerLetters = target
-    .replace(groupRegex, '$1')
-    .replace(globalRegex(orRegex), ' ')
-    .replace(globalRegex(andRegex), ' ')
+    .replace(strictGroupRegex, '$1')
+    .replace(global(orRegex), ' ')
+    .replace(global(andRegex), ' ')
     .replace(outerLetter, '')
     .split(' ')
     .filter(Boolean)
@@ -227,12 +236,12 @@ export function cp(lines: string[], targetLines: number[]): string {
   }
 
   const [signalRegex, signal] = catchSignal(target)
-  const result = split(target, signalRegex)
+  const result = split(resolve(target), signalRegex)
     .map(clear)
     .map(part => {
-      return groupRegex.test(part) ||
-        notGroupRegex.test(part) ||
-        letterRegex.test(part)
+      return strictGroupRegex.test(part) ||
+        strictNotGroupRegex.test(part) ||
+        strictLetterRegex.test(part)
         ? not(part)
         : not(group(part))
     })
@@ -255,7 +264,7 @@ export function cond(lines: string[], targetLines: number[]): string {
   const target = prune(lines[targetLines[0]])
   if (arrowRegex.test(target)) {
     return normalize(
-      target.split(globalRegex(arrowRegex)).reverse().map(not).join(arrowSignal)
+      target.split(global(arrowRegex)).reverse().map(not).join(arrowSignal)
     )
   }
 
@@ -264,7 +273,7 @@ export function cond(lines: string[], targetLines: number[]): string {
     return normalize(
       resolve(not(orLetters[0])),
       arrowSignal,
-      letterRegex.test(orLetters[1]) ? orLetters[1] : group(orLetters[1])
+      strictLetterRegex.test(orLetters[1]) ? orLetters[1] : group(orLetters[1])
     )
   }
 
@@ -287,7 +296,7 @@ export function bi(lines: string[], targetLines: number[]): string {
     throw new InvalidActionError()
   }
 
-  const parts = target.split(globalRegex(biArrowRegex))
+  const parts = target.split(global(biArrowRegex))
   return normalize(
     group(parts.join(arrowSignal)),
     andSignal,
@@ -309,7 +318,7 @@ export function inv(lines: string[], targetLines: number[]): string {
   const [target] = targets(lines, targetLines)
   const [signalRegex, signal] = catchSignal(target)
   const result = resolve(target)
-    .split(globalRegex(signalRegex))
+    .split(global(signalRegex))
     .reverse()
     .join(signal)
 
@@ -328,7 +337,7 @@ export function ad(lines: string[], targetLines: number[]): string {
   }
 
   const target = prune(lines[targetLines[0]])
-  if (!letterRegex.test(target)) {
+  if (!strictLetterRegex.test(target)) {
     throw new InvalidActionError()
   }
 
@@ -462,7 +471,7 @@ export function sh(lines: string[], targetLines: number[]): string {
 
   if (targetLines.length === 1 && arrowRegex.test(lines[targetLines[0]])) {
     const target = lines[targetLines[0]]
-      .split(globalRegex(arrowRegex))
+      .split(global(arrowRegex))
       .map(clear)
       .map(ungroup)
     return normalize(first(target), arrowSignal, last(target))
@@ -474,7 +483,7 @@ export function sh(lines: string[], targetLines: number[]): string {
     arrowRegex.test(lines[targetLines[1]])
   ) {
     const [target1, target2] = targets(lines, targetLines).map(target =>
-      target.split(globalRegex(arrowRegex)).map(clear).map(ungroup)
+      target.split(global(arrowRegex)).map(clear).map(ungroup)
     )
     if (compare(last(target1), first(target2))) {
       return normalize(first(target1), arrowSignal, last(target2))
@@ -499,7 +508,7 @@ export function dc(lines: string[], targetLines: number[]): string {
   }
 
   const groups = lines[targetLines[0]]
-    .split(globalRegex(andRegex))
+    .split(global(andRegex))
     .map(clear)
     .map(ungroup)
   if (groups.length !== 3) {
@@ -541,7 +550,7 @@ export function dd(lines: string[], targetLines: number[]): string {
   }
 
   const target = lines[targetLines[0]]
-    .split(globalRegex(andRegex))
+    .split(global(andRegex))
     .map(clear)
     .map(ungroup)
   if (target.length !== 3) {
@@ -606,7 +615,7 @@ export function conj(lines: string[], targetLines: number[]): string {
   }
 
   const target = targets(lines, targetLines).map(prune)
-  if (target.filter(t => letterRegex.test(t)).length !== target.length) {
+  if (target.filter(t => strictLetterRegex.test(t)).length !== target.length) {
     throw new InvalidActionError()
   }
 

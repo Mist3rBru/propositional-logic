@@ -1,10 +1,10 @@
-export const letterRegex = /^~*[a-uw-z]$/
+export const strictLetterRegex = /^~*[a-uw-z]$/
+export const strictGroupRegex = /^\((.*?)\)$/
+export const strictNotGroupRegex = /^~\(([^)]*)\)$/
 export const arrowRegex = /(?:[-=]>)|(?:−)||→/
 export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
 export const orRegex = /∨|v|V/
 export const andRegex = /\^|∧/
-export const groupRegex = /^\((.*?)\)$/
-export const notGroupRegex = /^~\(([^)]*)\)$/
 export const notRegex = /~/
 export const doubleNotRegex = /~{2}/
 
@@ -46,8 +46,8 @@ export function mapNot(line: string): string {
 export function ungroup(line: string): string {
   const f = first(line)
   const l = last(line)
-  return groupRegex.test(line) && !/.+\).+/.test(line)
-    ? line.replace(groupRegex, '$1')
+  return strictGroupRegex.test(line) && !/.+\).+/.test(line)
+    ? line.replace(strictGroupRegex, '$1')
     : f === '(' && l !== ')'
     ? line.slice(1)
     : f !== '~' && l === ')' && !/.+\(.+/.test(line)
@@ -58,7 +58,7 @@ export function ungroup(line: string): string {
 export function group(...letters: string[]): string {
   const line = letters.join(' ')
   return /^~*\(.+\)$/.test(line)
-    ? /.+\).+/.test(line)
+    ? /.\)./.test(line)
       ? `(${line})`
       : line
     : /^~*\([^)]+$/.test(line)
@@ -70,11 +70,11 @@ export function group(...letters: string[]): string {
 
 export function resolve(line: string): string {
   let result = line
-  if (notGroupRegex.test(result)) {
-    result = mapNot(result.replace(notGroupRegex, '$1'))
+  if (strictNotGroupRegex.test(result)) {
+    result = mapNot(result.replace(strictNotGroupRegex, '$1'))
   }
   if (doubleNotRegex.test(result)) {
-    result = result.replace(globalRegex(doubleNotRegex), '')
+    result = result.replace(global(doubleNotRegex), '')
   }
   return ungroup(result)
 }
@@ -121,7 +121,7 @@ export function find(
   return regex.test(target[0]) ? target : (target.reverse() as [string, string])
 }
 
-export function globalRegex(regex: RegExp): RegExp {
+export function global(regex: RegExp): RegExp {
   if (regex.global) {
     return regex
   }

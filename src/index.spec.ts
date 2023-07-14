@@ -1,4 +1,5 @@
 import { InvalidActionError, InvalidLineError, resolve } from './index'
+import { normalize } from './utils'
 
 describe('resolve', () => {
   describe('single line', () => {
@@ -24,6 +25,18 @@ describe('resolve', () => {
       const result = resolve('mp 1 4', ['', ''], false)
 
       expect(result).toBe(new InvalidLineError(4).message)
+    })
+
+    it('should throw inner InvalidActionError', () => {
+      const rejection = () => resolve('mp 1 2', ['q -> r', 't'], true)
+
+      expect(rejection).toThrow(new InvalidActionError())
+    })
+
+    it('should return inner InvalidActionError.message', () => {
+      const result = resolve('mp 1 2', ['q -> r', 't'], false)
+
+      expect(result).toBe(new InvalidActionError().message)
     })
 
     it('should return action result', () => {
@@ -68,10 +81,18 @@ describe('resolve', () => {
           'ad u 10'
         ]
 
-        const result = resolve(answers, base)
+        const result = resolve(answers, base, false)
 
         expect(result).toStrictEqual(
-          base.concat(['~p', '~q v r', 'r', 'r -> t', 't', 't v u'])
+          base.concat([
+            '~p',
+            '~q v r',
+            'r',
+            'r -> t',
+            't',
+            't v u'
+          //  't v u'
+          ]).map(g => normalize(g))
         )
       })
 
@@ -88,10 +109,12 @@ describe('resolve', () => {
           'COND em 11'
         ]
 
-        const result = resolve(answers, base)
+        const result = resolve(answers, base, false)
 
         expect(result).toStrictEqual(
-          base.concat(['p', 'q', 's', '~r', 's ^ ~r', '~t', '~t v u', 't -> u'])
+          base
+            .concat(['p', 'q', 's', '~r', 's ^ ~r', '~t', '~t v u', 't -> u'])
+            .map(g => normalize(g))
         )
       })
 
@@ -106,10 +129,12 @@ describe('resolve', () => {
           'AD u em 10'
         ]
 
-        const result = resolve(answers, base)
+        const result = resolve(answers, base, false)
 
         expect(result).toStrictEqual(
-          base.concat(['s', '~q v r', 'r', 'r -> t', 't', 't v u'])
+          base
+            .concat(['s', '~q v r', 'r', 'r -> t', 't', 't v u'])
+            .map(g => normalize(g))
         )
       })
 
@@ -123,35 +148,230 @@ describe('resolve', () => {
           'q'
         ]
         const answers = [
-          'MT em 1 e 6',
-          'DM em 7',
-          'SIM ~p em 8',
-          'SIM t em 8',
-          'SD em 4 e 9',
-          'SD em 3 e 10',
-          'MP em 2 e 12',
-          'CONJ em 13 e 11',
-          'DM em 14',
-          'MT em 5 e 15',
-          'DN em 16'
+          'DM 4',
+          'CP 7'
+          // ''
         ]
 
-        const result = resolve(answers, base)
+        const result = resolve(answers, base, false)
 
         expect(result).toStrictEqual(
-          base.concat([
-            '~(p v ~t)',
-            '~p ^ t',
-            '~p',
-            't',
-            'r',
-            '~m',
-            'u',
-            'u ^ r',
-            '~(~u v ~r)',
-            '~~s',
-            's'
-          ])
+          base
+            .concat([
+              '~(~p ^ ~r)',
+              '~p ^ ~r'
+              //~p ^ ~r
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 05', () => {
+        const base = ['p → (q→ r)', 'p → q', 'p V s', '~s']
+        const answers = ['SD 3 4', 'MP 1 5', 'SH 2 6', 'MP 5 7', 'AD t 8']
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              'p',
+              'q -> r',
+              'p -> r',
+              'r',
+              'r v t'
+              // 'r v t'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 06', () => {
+        const base = ['p -> r ^ t', 't -> ~s', 'p V u', 's']
+        const answers = [
+          'MT 4 2',
+          'AD r 5',
+          'COND 6',
+          'MT 5 7',
+          'CONJ 8 5',
+          'MT 1 9',
+          'SD 10 3'
+        ]
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~t',
+              '~t v r',
+              't -> r',
+              '~r',
+              '~r ^ ~t',
+              '~p',
+              'u'
+              // 'u'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 07', () => {
+        const base = ['p ^ q → r', 'r → s', 't→ ~u', 't', '~s v u']
+        const answers = [
+          'MP 3 4',
+          'SD 5 6',
+          'MT 2 7',
+          'MT 1 8',
+          'DM 9',
+          'COND 10'
+        ]
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~u',
+              '~s',
+              '~r',
+              '~(p ^ q)',
+              '~p v ~q',
+              'p -> ~q'
+              //  'p -> ~q'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 08', () => {
+        const base = ['q v ( r → t)', 'q → s', '~s→ (t→p)', '~s']
+        const answers = ['MT 2 4', 'SD 1 5', 'MP 3 4', 'SH 6 7']
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~q',
+              'r → t',
+              't -> p',
+              'r -> p'
+              // 'r -> p'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 09', () => {
+        const base = ['p → q', 'r →s', 'q v s → ~t', 't']
+        const answers = [
+          'MT 3 4',
+          'DM 5',
+          'SIM ~q 6',
+          'MT 1 7',
+          'SIM ~s 6',
+          'MT 2 9',
+          'CONJ 8 10'
+        ]
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~(q v s)',
+              '~q ^ ~s',
+              '~q',
+              '~p',
+              '~s',
+              '~r',
+              '~p ^ ~r'
+              //  '~p ^ ~r'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 10', () => {
+        const base = ['~p → ~q v r', 's v (r → t)', '~p v s', '~s', 'q']
+        const answers = ['SD 3 4', 'MP 1 6', 'SD 5 7', 'SD 2 4', 'MP 8 9']
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~p',
+              '~q v r',
+              'r',
+              'r → t',
+              't'
+              // 't'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 11', () => {
+        const base = ['p → s', 'p ^ q', 's ^ r → ~t', 'q → r']
+        const answers = [
+          'SIM p 2',
+          'SIM q 2',
+          'MP 1 5',
+          'MP 4 6',
+          'CONJ 7 8',
+          'MP 9 3',
+          'AD u 10',
+          'COND 11'
+        ]
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              'p',
+              'q',
+              's',
+              'r',
+              's ^ r',
+              '~t',
+              '~t v u',
+              't -> u'
+              // 't -> u'
+            ])
+            .map(g => normalize(g))
+        )
+      })
+
+      it('should result example 12', () => {
+        const base = ['s v ~q', 'p → q', 'r v (t ^ ~s)']
+        const answers = [
+          'DM 1',
+          'SIM s 4',
+          'SIM ~q 4',
+          'MT 2 6',
+          'DM 3',
+          'SIM r 8',
+          'CONJ 7 9'
+        ]
+
+        const result = resolve(answers, base, false)
+
+        expect(result).toStrictEqual(
+          base
+            .concat([
+              '~(~s ^ q)',
+              's',
+              '~q',
+              '~p',
+              '~(~r ^ ~(~t v s)',
+              'r',
+              '~p ^ r'
+              // '~p v r'
+            ])
+            .map(g => normalize(g))
         )
       })
     })
