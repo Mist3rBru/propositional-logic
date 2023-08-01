@@ -1,4 +1,4 @@
-import { InvalidActionError, InvalidLineError, resolve } from './index'
+import { InvalidActionError, InvalidLineError, resolve } from './resolve'
 import { normalize } from './utils'
 
 describe('resolve', () => {
