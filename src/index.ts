@@ -44,7 +44,7 @@ export function resolve<T extends string | string[]>(
   try {
     return LogicActions[action](solvedLines.concat([line]), targetLines) as T
   } catch (error) {
-    if(throwOnError) {
+    if (throwOnError) {
       throw error
     }
     return error.message

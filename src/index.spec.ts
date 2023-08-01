@@ -84,15 +84,17 @@ describe('resolve', () => {
         const result = resolve(answers, base, false)
 
         expect(result).toStrictEqual(
-          base.concat([
-            '~p',
-            '~q v r',
-            'r',
-            'r -> t',
-            't',
-            't v u'
-          //  't v u'
-          ]).map(g => normalize(g))
+          base
+            .concat([
+              '~p',
+              '~q v r',
+              'r',
+              'r -> t',
+              't',
+              't v u'
+              //  't v u'
+            ])
+            .map(g => normalize(g))
         )
       })
 

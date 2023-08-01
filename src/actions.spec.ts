@@ -69,7 +69,9 @@ describe('actions', () => {
       expect(sut(...make('~a ^ b'))).toBe('~(a v ~b)')
       expect(sut(...make('~(a ^ b ^ c)'))).toBe('~a v ~b v ~c')
       expect(sut(...make('~(a v b) ^ ~(c v d)'))).toBe('(~a ^ ~b) v (~c ^ ~d)')
-      expect(sut(...make('~(p v q) -> ~(r ^ s)'))).toBe('(~p ^ ~q) -> (~r v ~s)')
+      expect(sut(...make('~(p v q) -> ~(r ^ s)'))).toBe(
+        '(~p ^ ~q) -> (~r v ~s)'
+      )
       expect(sut(...make('(~a v ~b) ^ (~c v ~d)'))).toBe('~(a ^ b) v ~(c ^ d)')
       expect(() => sut(...make('p'))).toThrow(InvalidActionError)
       expect(() => sut(...make('~~p'))).toThrow(InvalidActionError)
