@@ -4,6 +4,8 @@ describe('describe', () => {
   it('should describe letter', () => {
     expect(sut('a')).toBe('"a" is true')
     expect(sut('~a')).toBe('"a" is false')
+    expect(sut('~~a')).toBe('"a" is true')
+    expect(sut('~~~a')).toBe('"a" is false')
   })
 
   it('should describe logic operators', () => {
@@ -12,6 +14,9 @@ describe('describe', () => {
     expect(sut('a v b')).toBe('"a" is true or "b" is true')
     expect(sut('~a v ~b')).toBe('"a" is false or "b" is false')
     expect(sut('a -> b')).toBe('if "a" is true, then "b" is true')
+    expect(sut('~a -> b')).toBe('if "a" is false, then "b" is true')
+    expect(sut('a -> ~b')).toBe('if "a" is true, then "b" is false')
+    expect(sut('a <-> b')).toBe('if and only if "a" is true, then "b" is true')
   })
 
   it('should describe mixed operators', () => {
@@ -22,6 +27,13 @@ describe('describe', () => {
     )
     expect(sut('a v ~b -> ~c')).toBe(
       'if "a" is true or "b" is false, then "c" is false'
+    )
+  })
+
+  it('should describe groups', () => {
+    expect(sut('~(p ^ q)')).toBe('negation of ("p" and "q")')
+    expect(sut('p ^ (q v r)')).toBe(
+      '"p" is true and ("q" is true or "r" is true)'
     )
   })
 })
