@@ -1,5 +1,11 @@
 # @mist3rbru/p-logic
 
+## 0.1.1
+
+### Patch Changes
+
+- cb930de: fix: package exports
+
 ## 0.1.0
 
 ### Minor Changes
