@@ -85,9 +85,9 @@ function describeNotGroup(line: string): string {
   )
 }
 
-function describeGroup(line: string): string {
+function describeGroup(line: string, lang: Lang): string {
   return line.replace(global(groupRegex), match =>
-    concat('(', describe(extract(match, groupRegex)), ')')
+    concat('(', describe(extract(match, groupRegex), lang), ')')
   )
 }
 
@@ -103,12 +103,12 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
     const normalizedLines = lines.map(g => normalize(g))
     let result = ''
     for (let i = 0; i < normalizedLines.length; i++) {
-      const description = describe(lines[i])
+      const description = describe(lines[i], lang)
       result +=
         i === 0
           ? description
           : i === lines.length - 1
-          ? concat('; therefore', description)
+          ? concat(';', translate('therefore', lang), description)
           : concat(';', description)
     }
     return result
@@ -120,7 +120,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
     result = describeNotGroup(result)
   }
   if (groupRegex.test(result)) {
-    result = describeGroup(result)
+    result = describeGroup(result, lang)
   }
 
   result = describeLetters(result)
