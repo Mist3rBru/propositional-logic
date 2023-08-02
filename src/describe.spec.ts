@@ -51,5 +51,8 @@ describe('describe', () => {
   it('should describe and translate', () => {
     expect(sut('a', 'en')).toBe('"a" is true')
     expect(sut('a', 'pt')).toBe('"a" é verdadeiro')
+    expect(sut(['a', 'a -> b', 'b'], 'pt')).toBe(
+      '"a" é verdadeiro; se "a" é verdadeiro, então "b" é verdadeiro; portanto "b" é verdadeiro'
+    )
   })
 })
