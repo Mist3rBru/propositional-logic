@@ -40,7 +40,7 @@ describe('resolve', () => {
     })
 
     it('should return action result', () => {
-      const result = sut('mp 1 2', ['p -> q', 'p'], false)
+      const result = sut('mp 1 2', ['p -> q', 'p'])
 
       expect(result).toBe('q')
     })
@@ -71,7 +71,7 @@ describe('resolve', () => {
 
     describe('examples', () => {
       it('should result example 01', () => {
-        const base = ['~p -> ~q v r', ' s v (r -> t)', ' ~p v s', ' ~s', ' q']
+        const base = ['~p -> ~q v r', 's v (r -> t)', '~p v s', '~s', 'q']
         const answers = [
           'sd 3 4',
           'mp 1 6',

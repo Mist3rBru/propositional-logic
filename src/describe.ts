@@ -54,7 +54,16 @@ function describeOperators(line: string): string {
     line = line.replace(orRegex, 'or')
   }
   if (andRegex.test(line)) {
-    line = line.replace(andRegex, 'and')
+    line = line
+      .replace(andRegex, 'and')
+      .replace(
+        /(["\w]+)\sis\strue\sand\s(["\w]+)\sis\strue/,
+        '$1 and $2 are true'
+      )
+      .replace(
+        /(["\w]+)\sis\sfalse\sand\s(["\w]+)\sis\sfalse/,
+        '$1 and $2 are false'
+      )
   }
   if (biArrowRegex.test(line)) {
     line = concat('if and only if', line.replace(biArrowRegex, ', then'))
@@ -87,13 +96,31 @@ function describeGroup(line: string): string {
   )
 }
 
-export function describe<T extends string | string[]>(lines: T): T {
+function describeList(lines: string[]): string {
+  const normalizedLines = lines.map(g => normalize(g))
+  let result = ''
+  for (let i = 0; i < normalizedLines.length; i++) {
+    const description = describe(lines[i])
+    result +=
+      i === 0
+        ? description
+        : i === lines.length - 1
+        ? concat('; therefore', description)
+        : concat(';', description)
+  }
+  return result
+}
+
+/**
+ * @example
+ * describe('a -> b')
+ * //'if "a" is true, then "b" is true'
+ * describe(['a -> b', 'a', 'b'])
+ * //'if "a" is true, then "b" is true; "a" is true; therefore "b" is true'
+ */
+export function describe(lines: string | string[]): string {
   if (Array.isArray(lines)) {
-    const result = Array.from(lines).map(g => normalize(g))
-    for (const line of lines) {
-      result.push(describe(line))
-    }
-    return result as T
+    return describeList(lines)
   }
 
   let result = lines as string
@@ -108,5 +135,5 @@ export function describe<T extends string | string[]>(lines: T): T {
   result = describeLetters(result)
   result = describeOperators(result)
 
-  return extract(extract(result, /\s+([,)])/g), /([(])\s+/g) as T
+  return extract(extract(result, /\s+([,)])/g), /([(])\s+/g)
 }

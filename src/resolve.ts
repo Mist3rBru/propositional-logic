@@ -8,6 +8,19 @@ export * from './errors'
 export type LogicAction = keyof typeof LogicActions
 export type LogicError = keyof typeof LogicErrors
 
+/**
+ * @example
+ * resolve(
+ *  'mp 1 2',
+ *  ['p -> q', 'p']
+ * )
+ * //'q'
+ * resolve(
+ *  ['sd 3 4', 'mp 1 6', 'sd 5 7', 'sd 2 4', 'mp 8 9', 'ad u 10'],
+ *  ['~p -> ~q v r', 's v (r -> t)', '~p v s', '~s', 'q']
+ * )
+ * //['~p -> ~q v r', 's v (r -> t)', '~p v s', '~s', 'q', '~p', '~q v r', 'r', 'r -> t', 't', 't v u'
+ **/
 export function resolve<T extends string | string[]>(
   lines: T,
   solvedLines: string[] = [],
