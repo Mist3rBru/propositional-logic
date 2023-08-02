@@ -47,4 +47,9 @@ describe('describe', () => {
       'if "a" is true, then "b" is true; therefore if "a" is false, then "b" is false'
     )
   })
+
+  it('should describe and translate', () => {
+    expect(sut('a', 'en')).toBe('"a" is true')
+    expect(sut('a', 'pt')).toBe('"a" é verdadeiro')
+  })
 })

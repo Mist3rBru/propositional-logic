@@ -1,5 +1,7 @@
 import { InvalidActionError } from './errors'
 
+export type Lang = 'en' | 'pt'
+
 type Keyword =
   | 'and'
   | 'or'
@@ -39,7 +41,7 @@ const pt: Record<Keyword, string> = {
  */
 export function translate<T extends string | string[]>(
   lines: T,
-  lang: 'en' | 'pt'
+  lang: Lang
 ): T {
   if (Array.isArray(lines)) {
     return lines.map(line => translate(line, lang)) as T

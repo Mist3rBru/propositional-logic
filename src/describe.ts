@@ -1,3 +1,4 @@
+import { Lang, translate } from './translate'
 import {
   andRegex,
   arrowRegex,
@@ -97,7 +98,7 @@ function describeGroup(line: string): string {
  * describe(['a -> b', 'a', 'b'])
  * //'if "a" is true, then "b" is true; "a" is true; therefore "b" is true'
  */
-export function describe(lines: string | string[]): string {
+export function describe(lines: string | string[], lang: Lang = 'en'): string {
   if (Array.isArray(lines)) {
     const normalizedLines = lines.map(g => normalize(g))
     let result = ''
@@ -124,6 +125,7 @@ export function describe(lines: string | string[]): string {
 
   result = describeLetters(result)
   result = describeOperators(result)
+  result = extract(extract(result, /\s+([,)])/g), /([(])\s+/g)
 
-  return extract(extract(result, /\s+([,)])/g), /([(])\s+/g)
+  return translate(result, lang)
 }
