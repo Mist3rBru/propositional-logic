@@ -1,5 +1,11 @@
 # @mist3rbru/p-logic
 
+## 0.1.2
+
+### Patch Changes
+
+- cdee5e6: fix(describe): repass lang on recursive resolution
+
 ## 0.1.1
 
 ### Patch Changes
