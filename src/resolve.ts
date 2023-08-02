@@ -1,12 +1,8 @@
 import * as LogicActions from './actions'
-import * as LogicErrors from './errors'
+import { InvalidActionError, InvalidLineError } from './errors'
 import { clear, normalize } from './utils'
 
-export * from './actions'
-export * from './errors'
-
 export type LogicAction = keyof typeof LogicActions
-export type LogicError = keyof typeof LogicErrors
 
 /**
  * @example
@@ -39,19 +35,19 @@ export function resolve<T extends string | string[]>(
 
   const action = answerParts[0] as LogicAction
   if (!LogicActions[action] && throwOnError) {
-    throw new LogicErrors.InvalidActionError()
+    throw new InvalidActionError()
   }
   if (!LogicActions[action]) {
-    return new LogicErrors.InvalidActionError().message as T
+    return new InvalidActionError().message as T
   }
 
   const targetLines = answerParts.map(n => Number(n) - 1).filter(n => !isNaN(n))
   const notFoundLine = targetLines.find(n => n < 0 || n >= solvedLines.length)
   if (notFoundLine && throwOnError) {
-    throw new LogicErrors.InvalidLineError(notFoundLine + 1)
+    throw new InvalidLineError(notFoundLine + 1)
   }
   if (notFoundLine) {
-    return new LogicErrors.InvalidLineError(notFoundLine + 1).message as T
+    return new InvalidLineError(notFoundLine + 1).message as T
   }
 
   try {

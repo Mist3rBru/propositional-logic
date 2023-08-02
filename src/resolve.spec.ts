@@ -1,4 +1,5 @@
-import { InvalidActionError, InvalidLineError, resolve as sut } from './resolve'
+import { InvalidActionError, InvalidLineError } from './errors'
+import { resolve as sut } from './resolve'
 import { normalize } from './utils'
 
 describe('resolve', () => {
