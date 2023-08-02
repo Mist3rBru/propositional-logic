@@ -8,6 +8,9 @@ export const andRegex = /\^|∧/
 export const notRegex = /~/
 export const doubleNotRegex = /~{2}/
 
+export const notGroupRegex = /~\(([^)]*)\)/
+export const groupRegex = /\(([^)]*)\)/
+
 export const orSignal = 'v'
 export const andSignal = '^'
 export const arrowSignal = '->'
@@ -126,6 +129,10 @@ export function global(regex: RegExp): RegExp {
     return regex
   }
   return new RegExp(regex, 'g')
+}
+
+export function extract(line: string, regex: RegExp): string {
+  return line.replace(regex, '$1')
 }
 
 export function catchSignal(line: string): [regex: RegExp, signal: string] {

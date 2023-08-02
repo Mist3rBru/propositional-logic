@@ -3,7 +3,6 @@ import { defineConfig } from 'vitest/config'
 // https://vitest.dev/config/
 export default defineConfig({
   test: {
-    globals: true,
-    bail: 1
+    globals: true
   }
 })
