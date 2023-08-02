@@ -75,9 +75,6 @@ function describeOperators(line: string): string {
 }
 
 function describeNotGroup(line: string): string {
-  if (!notGroupRegex.test(line)) {
-    return line
-  }
   return line.replace(global(notGroupRegex), match =>
     concat(
       'negation of (',
@@ -88,27 +85,9 @@ function describeNotGroup(line: string): string {
 }
 
 function describeGroup(line: string): string {
-  if (!groupRegex.test(line)) {
-    return line
-  }
   return line.replace(global(groupRegex), match =>
     concat('(', describe(extract(match, groupRegex)), ')')
   )
-}
-
-function describeList(lines: string[]): string {
-  const normalizedLines = lines.map(g => normalize(g))
-  let result = ''
-  for (let i = 0; i < normalizedLines.length; i++) {
-    const description = describe(lines[i])
-    result +=
-      i === 0
-        ? description
-        : i === lines.length - 1
-        ? concat('; therefore', description)
-        : concat(';', description)
-  }
-  return result
 }
 
 /**
@@ -120,7 +99,18 @@ function describeList(lines: string[]): string {
  */
 export function describe(lines: string | string[]): string {
   if (Array.isArray(lines)) {
-    return describeList(lines)
+    const normalizedLines = lines.map(g => normalize(g))
+    let result = ''
+    for (let i = 0; i < normalizedLines.length; i++) {
+      const description = describe(lines[i])
+      result +=
+        i === 0
+          ? description
+          : i === lines.length - 1
+          ? concat('; therefore', description)
+          : concat(';', description)
+    }
+    return result
   }
 
   let result = lines as string
