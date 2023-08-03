@@ -1,8 +1,21 @@
 import * as LogicActions from './actions'
 import { InvalidActionError, InvalidLineError } from './errors'
+import { Lang, translate } from './translate'
 import { clear, normalize } from './utils'
 
 export type LogicAction = keyof typeof LogicActions
+
+type ResolveOptions = {
+  /**
+   * @default true
+   */
+  throwOnError?: boolean
+  /**
+   * The language of the exception messages
+   * @default 'en'
+   */
+  lang?: Lang
+}
 
 /**
  * @example
@@ -20,12 +33,18 @@ export type LogicAction = keyof typeof LogicActions
 export function resolve<T extends string | string[]>(
   lines: T,
   solvedLines: string[] = [],
-  throwOnError: boolean = true
+  options?: ResolveOptions
 ): T {
+  const _options: Required<ResolveOptions> = {
+    throwOnError: true,
+    lang: 'en',
+    ...options
+  }
+
   if (Array.isArray(lines)) {
     const result = Array.from(solvedLines).map(g => normalize(g))
     for (const unsolvedLine of lines) {
-      result.push(resolve(unsolvedLine, result, throwOnError))
+      result.push(resolve(unsolvedLine, result, _options))
     }
     return result as T
   }
@@ -34,28 +53,31 @@ export function resolve<T extends string | string[]>(
   const answerParts = clear(line).split(' ')
 
   const action = answerParts[0] as LogicAction
-  if (!LogicActions[action] && throwOnError) {
-    throw new InvalidActionError()
+  if (!LogicActions[action] && _options.throwOnError) {
+    throw translate(new InvalidActionError(), _options.lang)
   }
   if (!LogicActions[action]) {
-    return new InvalidActionError().message as T
+    return translate(new InvalidActionError().message, _options.lang) as T
   }
 
   const targetLines = answerParts.map(n => Number(n) - 1).filter(n => !isNaN(n))
   const notFoundLine = targetLines.find(n => n < 0 || n >= solvedLines.length)
-  if (notFoundLine && throwOnError) {
-    throw new InvalidLineError(notFoundLine + 1)
+  if (notFoundLine && _options.throwOnError) {
+    throw translate(new InvalidLineError(notFoundLine + 1), _options.lang)
   }
   if (notFoundLine) {
-    return new InvalidLineError(notFoundLine + 1).message as T
+    return translate(
+      new InvalidLineError(notFoundLine + 1).message,
+      _options.lang
+    ) as T
   }
 
   try {
     return LogicActions[action](solvedLines.concat([line]), targetLines) as T
   } catch (error) {
-    if (throwOnError) {
-      throw error
+    if (_options.throwOnError) {
+      throw translate(error, _options.lang)
     }
-    return error.message
+    return translate(error.message, _options.lang)
   }
 }

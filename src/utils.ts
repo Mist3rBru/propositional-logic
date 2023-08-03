@@ -1,10 +1,12 @@
 export const strictLetterRegex = /^~*[a-uw-z]$/
 export const strictGroupRegex = /^\((.*?)\)$/
 export const strictNotGroupRegex = /^~\(([^)]*)\)$/
+export const strictOrRegex = /^[∨vV]$/
+
 export const arrowRegex = /(?:[-=]>)|(?:−)||→/
 export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
-export const orRegex = /∨|v|V/
-export const andRegex = /\^|∧/
+export const orRegex = /[∨vV]/
+export const andRegex = /[\^∧]/
 export const notRegex = /~/
 export const doubleNotRegex = /~{2}/
 
@@ -173,4 +175,8 @@ export function last(lines: string | string[]): string {
 
 export function targets(lines: string[], targetLines: number[]): string[] {
   return targetLines.map(target => lines[target])
+}
+
+export function mapWords(line: string, cb: (word: string) => string): string {
+  return line.split(/\s+/g).map(cb).join(' ')
 }

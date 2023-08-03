@@ -9,8 +9,10 @@ import {
   normalize,
   notGroupRegex,
   notRegex,
-  orRegex,
-  strictLetterRegex
+  strictLetterRegex,
+  strictOrRegex,
+  mapWords,
+  orRegex
 } from './utils'
 
 function concat(...words: string[]): string {
@@ -27,10 +29,6 @@ function quote(letter: string): string {
   return `"${letter}"`
 }
 
-function mapQuote(line: string): string {
-  return line.split(' ').map(quote).join(' ')
-}
-
 function describeLetter(letter: string): string {
   if (!strictLetterRegex.test(letter)) {
     return letter
@@ -43,16 +41,12 @@ function describeLetter(letter: string): string {
     : concat(absoluteLetter, 'is false')
 }
 
-function describeLetters(line: string): string {
-  return line.split(' ').map(describeLetter).join(' ')
-}
-
 function describeOperators(line: string): string {
   if (orRegex.test(line) && andRegex.test(line)) {
     line = line.replace(andRegex, 'and').replace(orRegex, ', or')
   }
   if (orRegex.test(line)) {
-    line = line.replace(orRegex, 'or')
+    line = mapWords(line, word => (strictOrRegex.test(word) ? 'or' : word))
   }
   if (andRegex.test(line)) {
     line = line
@@ -79,7 +73,7 @@ function describeNotGroup(line: string): string {
   return line.replace(global(notGroupRegex), match =>
     concat(
       'negation of (',
-      describeOperators(mapQuote(extract(match, notGroupRegex))),
+      describeOperators(mapWords(extract(match, notGroupRegex), quote)),
       ')'
     )
   )
@@ -123,7 +117,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
     result = describeGroup(result, lang)
   }
 
-  result = describeLetters(result)
+  result = mapWords(result, describeLetter)
   result = describeOperators(result)
   result = extract(extract(result, /\s+([,)])/g), /([(])\s+/g)
 

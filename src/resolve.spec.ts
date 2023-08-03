@@ -5,37 +5,38 @@ import { normalize } from './utils'
 describe('resolve', () => {
   describe('single line', () => {
     it('should throw InvalidActionError', () => {
-      const rejection = () => sut('1 2', [], true)
+      const rejection = () => sut('1 2', [], { throwOnError: true })
 
       expect(rejection).toThrow(InvalidActionError)
     })
 
     it('should return InvalidActionError.message', () => {
-      const result = sut('1 2', ['', ''], false)
+      const result = sut('1 2', ['', ''], { throwOnError: false })
 
       expect(result).toBe(new InvalidActionError().message)
     })
 
     it('should throw InvalidLineError', () => {
-      const rejection = () => sut('mp -1 2', ['', ''], true)
+      const rejection = () => sut('mp -1 2', ['', ''], { throwOnError: true })
 
       expect(rejection).toThrow(InvalidLineError)
     })
 
     it('should return InvalidLineError.message', () => {
-      const result = sut('mp 1 4', ['', ''], false)
+      const result = sut('mp 1 4', ['', ''], { throwOnError: false })
 
       expect(result).toBe(new InvalidLineError(4).message)
     })
 
     it('should throw inner InvalidActionError', () => {
-      const rejection = () => sut('mp 1 2', ['q -> r', 't'], true)
+      const rejection = () =>
+        sut('mp 1 2', ['q -> r', 't'], { throwOnError: true })
 
       expect(rejection).toThrow(new InvalidActionError())
     })
 
     it('should return inner InvalidActionError.message', () => {
-      const result = sut('mp 1 2', ['q -> r', 't'], false)
+      const result = sut('mp 1 2', ['q -> r', 't'], { throwOnError: false })
 
       expect(result).toBe(new InvalidActionError().message)
     })
@@ -61,7 +62,9 @@ describe('resolve', () => {
     })
 
     it('should list exceptions', () => {
-      const result = sut(['mp -1 1', 'mp 1 4', '1 2'], [], false)
+      const result = sut(['mp -1 1', 'mp 1 4', '1 2'], [], {
+        throwOnError: false
+      })
 
       expect(result).toStrictEqual([
         new InvalidLineError(-1).message,
@@ -82,7 +85,7 @@ describe('resolve', () => {
           'ad u 10'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -112,7 +115,7 @@ describe('resolve', () => {
           'COND em 11'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -132,7 +135,7 @@ describe('resolve', () => {
           'AD u em 10'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -156,7 +159,7 @@ describe('resolve', () => {
           // ''
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -173,7 +176,7 @@ describe('resolve', () => {
         const base = ['p → (q→ r)', 'p → q', 'p V s', '~s']
         const answers = ['SD 3 4', 'MP 1 5', 'SH 2 6', 'MP 5 7', 'AD t 8']
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -201,7 +204,7 @@ describe('resolve', () => {
           'SD 10 3'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -230,7 +233,7 @@ describe('resolve', () => {
           'COND 10'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -251,7 +254,7 @@ describe('resolve', () => {
         const base = ['q v ( r → t)', 'q → s', '~s→ (t→p)', '~s']
         const answers = ['MT 2 4', 'SD 1 5', 'MP 3 4', 'SH 6 7']
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -278,7 +281,7 @@ describe('resolve', () => {
           'CONJ 8 10'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -300,7 +303,7 @@ describe('resolve', () => {
         const base = ['~p → ~q v r', 's v (r → t)', '~p v s', '~s', 'q']
         const answers = ['SD 3 4', 'MP 1 6', 'SD 5 7', 'SD 2 4', 'MP 8 9']
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -329,7 +332,7 @@ describe('resolve', () => {
           'COND 11'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
@@ -360,7 +363,7 @@ describe('resolve', () => {
           'CONJ 7 9'
         ]
 
-        const result = sut(answers, base, false)
+        const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
           base
