@@ -1,4 +1,4 @@
-import { InvalidActionError } from './errors'
+import * as LogicErrors from './errors'
 
 export type Lang = 'en' | 'pt'
 
@@ -16,19 +16,44 @@ type Keyword =
   | 'of'
   | 'negation'
 
-const pt: Record<Keyword, string> = {
-  and: 'e',
-  or: 'ou',
-  true: 'verdadeiro',
-  false: 'falso',
-  if: 'se',
-  then: 'então',
-  therefore: 'portanto',
-  only: 'somente',
-  is: 'é',
-  are: 'são',
-  of: 'de',
-  negation: 'negação'
+export const pt: {
+  keywords: Record<Keyword, string>
+  exceptions: Record<
+    keyof typeof LogicErrors,
+    {
+      regex: RegExp
+      translation: string
+    }
+  >
+} = {
+  keywords: {
+    and: 'e',
+    or: 'ou',
+    true: 'verdadeiro',
+    false: 'falso',
+    if: 'se',
+    then: 'então',
+    therefore: 'portanto',
+    only: 'somente',
+    is: 'é',
+    are: 'são',
+    of: 'de',
+    negation: 'negação'
+  },
+  exceptions: {
+    InvalidActionError: {
+      regex: new RegExp(new LogicErrors.InvalidActionError().message),
+      translation: 'ação inválida'
+    },
+    InvalidLineError: {
+      regex: /line ('\d+') does not exist/,
+      translation: 'linha $1 não encontrada'
+    },
+    MissingTargetLineError: {
+      regex: /min target lines: (\d+), received: (\d+)/,
+      translation: 'linhas de alvo mínimas: $1, encontradas: $2'
+    }
+  }
 }
 
 /**
@@ -56,12 +81,20 @@ export function translate<T extends string | string[]>(
     case 'pt':
       result = line
         .replace(/(\w+)/g, match => {
-          return pt[match as Keyword] ?? match
+          return pt.keywords[match as Keyword] ?? match
         })
         .replace(/(são\s\w+)/g, '$1s')
+      if (result === line) {
+        for (const { regex, translation } of Object.values(pt.exceptions)) {
+          if (regex.test(line)) {
+            result = line.replace(regex, translation)
+            break
+          }
+        }
+      }
       break
     default:
-      throw new InvalidActionError()
+      throw new LogicErrors.InvalidActionError()
   }
 
   return result as T
