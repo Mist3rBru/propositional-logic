@@ -1,4 +1,5 @@
 import { describe as sut } from './describe'
+import * as LogicErrors from './errors'
 
 describe('describe', () => {
   it('should describe letter', () => {
@@ -54,5 +55,23 @@ describe('describe', () => {
     expect(sut(['a', 'a -> b', 'b'], 'pt')).toBe(
       '"a" é verdadeiro; se "a" é verdadeiro, então "b" é verdadeiro; portanto "b" é verdadeiro'
     )
+  })
+
+  it('should not describe exceptions', () => {
+    type LogicError = typeof LogicErrors
+    const cases: {
+      [K in keyof LogicError]: ConstructorParameters<LogicError[K]>
+    } = {
+      InvalidLineError: [1],
+      MissingTargetLineError: [1, 2],
+      InvalidActionError: []
+    }
+    const caseList = Object.entries(cases)
+    expect.assertions(caseList.length)
+    for (const [name, params] of caseList) {
+      //@ts-ignore
+      const error = new LogicErrors[name](...params)
+      expect(sut(error.message)).toBe(error.message)
+    }
   })
 })
