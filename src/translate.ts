@@ -51,7 +51,7 @@ export const pt: {
     },
     MissingTargetLineError: {
       regex: /min target lines: (\d+), received: (\d+)/,
-      translation: 'linhas de alvo mínimas: $1, encontradas: $2'
+      translation: 'linhas alvo mínimas: $1, encontradas: $2'
     }
   }
 }
@@ -64,7 +64,7 @@ export const pt: {
  * translate(['"a" is true', '"b" is false'], 'pt')
  * //['"a" é verdadeiro', '"b" é falso']
  */
-export function translate<T extends string | string[]>(
+export function translate<T extends string | string[] | Error>(
   lines: T,
   lang: Lang
 ): T {
@@ -72,8 +72,10 @@ export function translate<T extends string | string[]>(
     return lines.map(line => translate(line, lang)) as T
   }
 
-  const line = lines as string
+  const isError = typeof lines === 'object'
+  const line = typeof lines === 'string' ? lines : lines.message
   let result = ''
+
   switch (lang) {
     case 'en':
       result = line
@@ -95,6 +97,11 @@ export function translate<T extends string | string[]>(
       break
     default:
       throw new LogicErrors.InvalidActionError()
+  }
+
+  if (isError) {
+    lines.message = result
+    return lines
   }
 
   return result as T
