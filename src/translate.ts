@@ -38,22 +38,22 @@ export const pt: {
     is: 'é',
     are: 'são',
     of: 'de',
-    negation: 'negação'
+    negation: 'negação',
   },
   exceptions: {
     InvalidActionError: {
       regex: new RegExp(new LogicErrors.InvalidActionError().message),
-      translation: 'ação inválida'
+      translation: 'ação inválida',
     },
     InvalidLineError: {
       regex: /line ('\d+') does not exist/,
-      translation: 'linha $1 não encontrada'
+      translation: 'linha $1 não encontrada',
     },
     MissingTargetLineError: {
       regex: /min target lines: (\d+), received: (\d+)/,
-      translation: 'linhas alvo mínimas: $1, encontradas: $2'
-    }
-  }
+      translation: 'linhas alvo mínimas: $1, encontradas: $2',
+    },
+  },
 }
 
 /**

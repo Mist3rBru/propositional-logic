@@ -6,9 +6,9 @@ export default defineBuildConfig({
     inlineDependencies: true,
     emitCJS: true,
     esbuild: {
-      minify: true
-    }
+      minify: true,
+    },
   },
   declaration: true,
-  clean: true
+  clean: true,
 })

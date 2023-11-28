@@ -28,7 +28,7 @@ import {
   resolve,
   split,
   targets,
-  ungroup
+  ungroup,
 } from './utils'
 
 describe('utils', () => {

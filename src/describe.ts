@@ -1,4 +1,4 @@
-import { Lang, translate } from './translate'
+import { type Lang, translate } from './translate'
 import {
   andRegex,
   arrowRegex,
@@ -12,7 +12,7 @@ import {
   strictLetterRegex,
   strictOrRegex,
   mapWords,
-  orRegex
+  orRegex,
 } from './utils'
 
 function concat(...words: string[]): string {
@@ -102,8 +102,8 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
         i === 0
           ? description
           : i === lines.length - 1
-          ? concat(';', translate('therefore', lang), description)
-          : concat(';', description)
+            ? concat(';', translate('therefore', lang), description)
+            : concat(';', description)
     }
     return result
   }

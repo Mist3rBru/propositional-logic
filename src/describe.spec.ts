@@ -64,7 +64,7 @@ describe('describe', () => {
     } = {
       InvalidLineError: [1],
       MissingTargetLineError: [1, 2],
-      InvalidActionError: []
+      InvalidActionError: [],
     }
     const caseList = Object.entries(cases)
     expect.assertions(caseList.length)

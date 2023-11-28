@@ -28,7 +28,7 @@ import {
   ungroup,
   first,
   targets,
-  strictLetterRegex
+  strictLetterRegex,
 } from './utils'
 
 /**
@@ -195,7 +195,7 @@ export function dis(lines: string[], targetLines: number[]): string {
     target = [
       target.slice(0, startGroupIndex - 1),
       target.charAt(startGroupIndex - 1),
-      target.slice(startGroupIndex)
+      target.slice(startGroupIndex),
     ]
       .reverse()
       .join('')

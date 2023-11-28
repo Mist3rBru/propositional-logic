@@ -54,10 +54,10 @@ export function ungroup(line: string): string {
   return strictGroupRegex.test(line) && !/.+\).+/.test(line)
     ? line.replace(strictGroupRegex, '$1')
     : f === '(' && l !== ')'
-    ? line.slice(1)
-    : f !== '~' && l === ')' && !/.+\(.+/.test(line)
-    ? line.slice(0, line.length - 1)
-    : line
+      ? line.slice(1)
+      : f !== '~' && l === ')' && !/.+\(.+/.test(line)
+        ? line.slice(0, line.length - 1)
+        : line
 }
 
 export function group(...letters: string[]): string {
@@ -67,10 +67,10 @@ export function group(...letters: string[]): string {
       ? `(${line})`
       : line
     : /^~*\([^)]+$/.test(line)
-    ? `${line})`
-    : /\)$/.test(line)
-    ? `(${line}`
-    : `(${line})`
+      ? `${line})`
+      : /\)$/.test(line)
+        ? `(${line}`
+        : `(${line})`
 }
 
 export function resolve(line: string): string {
@@ -106,8 +106,8 @@ export function split(line: string, regex: RegExp): [string, string] {
   return !!~index
     ? [line.slice(0, index), line.slice(index + step)]
     : line.split(regex).length === 2
-    ? (line.split(regex) as [string, string])
-    : [line, '']
+      ? (line.split(regex) as [string, string])
+      : [line, '']
 }
 
 export function compare(...cases: string[]): boolean {
@@ -141,10 +141,10 @@ export function catchSignal(line: string): [regex: RegExp, signal: string] {
   return biArrowRegex.test(line)
     ? [biArrowRegex, biArrowSignal]
     : arrowRegex.test(line)
-    ? [arrowRegex, arrowSignal]
-    : orRegex.test(line)
-    ? [orRegex, orSignal]
-    : [andRegex, andSignal]
+      ? [arrowRegex, arrowSignal]
+      : orRegex.test(line)
+        ? [orRegex, orSignal]
+        : [andRegex, andSignal]
 }
 
 export function invertSignal(line: string): string {

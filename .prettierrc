@@ -5,7 +5,8 @@
   "useTabs": false,
   "semi": false,
   "singleQuote": true,
-  "trailingComma": "none",
   "tabWidth": 2,
-  "printWidth": 80
+  "printWidth": 80,
+  "trailingComma": "es5",
+  "plugins": []
 }

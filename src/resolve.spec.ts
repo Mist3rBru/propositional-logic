@@ -63,13 +63,13 @@ describe('resolve', () => {
 
     it('should list exceptions', () => {
       const result = sut(['mp -1 1', 'mp 1 4', '1 2'], [], {
-        throwOnError: false
+        throwOnError: false,
       })
 
       expect(result).toStrictEqual([
         new InvalidLineError(-1).message,
         new InvalidLineError(4).message,
-        new InvalidActionError().message
+        new InvalidActionError().message,
       ])
     })
 
@@ -82,7 +82,7 @@ describe('resolve', () => {
           'sd 5 7',
           'sd 2 4',
           'mp 8 9',
-          'ad u 10'
+          'ad u 10',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -95,7 +95,7 @@ describe('resolve', () => {
               'r',
               'r -> t',
               't',
-              't v u'
+              't v u',
               //  't v u'
             ])
             .map(g => normalize(g))
@@ -112,7 +112,7 @@ describe('resolve', () => {
           'CONJ em 7 e 8',
           'MP em 3 e 9',
           'AD u em 10',
-          'COND em 11'
+          'COND em 11',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -132,7 +132,7 @@ describe('resolve', () => {
           'SD em 5 e 7',
           'MP em 2 e 6',
           'MP em 8 e 9',
-          'AD u em 10'
+          'AD u em 10',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -151,11 +151,11 @@ describe('resolve', () => {
           '~t v ~m',
           'p  V  r',
           '~s -> ~u v ~r',
-          'q'
+          'q',
         ]
         const answers = [
           'DM 4',
-          'CP 7'
+          'CP 7',
           // ''
         ]
 
@@ -165,7 +165,7 @@ describe('resolve', () => {
           base
             .concat([
               '~(~p ^ ~r)',
-              '~p ^ ~r'
+              '~p ^ ~r',
               //~p ^ ~r
             ])
             .map(g => normalize(g))
@@ -185,7 +185,7 @@ describe('resolve', () => {
               'q -> r',
               'p -> r',
               'r',
-              'r v t'
+              'r v t',
               // 'r v t'
             ])
             .map(g => normalize(g))
@@ -201,7 +201,7 @@ describe('resolve', () => {
           'MT 5 7',
           'CONJ 8 5',
           'MT 1 9',
-          'SD 10 3'
+          'SD 10 3',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -215,7 +215,7 @@ describe('resolve', () => {
               '~r',
               '~r ^ ~t',
               '~p',
-              'u'
+              'u',
               // 'u'
             ])
             .map(g => normalize(g))
@@ -230,7 +230,7 @@ describe('resolve', () => {
           'MT 2 7',
           'MT 1 8',
           'DM 9',
-          'COND 10'
+          'COND 10',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -243,7 +243,7 @@ describe('resolve', () => {
               '~r',
               '~(p ^ q)',
               '~p v ~q',
-              'p -> ~q'
+              'p -> ~q',
               //  'p -> ~q'
             ])
             .map(g => normalize(g))
@@ -262,7 +262,7 @@ describe('resolve', () => {
               '~q',
               'r → t',
               't -> p',
-              'r -> p'
+              'r -> p',
               // 'r -> p'
             ])
             .map(g => normalize(g))
@@ -278,7 +278,7 @@ describe('resolve', () => {
           'MT 1 7',
           'SIM ~s 6',
           'MT 2 9',
-          'CONJ 8 10'
+          'CONJ 8 10',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -292,7 +292,7 @@ describe('resolve', () => {
               '~p',
               '~s',
               '~r',
-              '~p ^ ~r'
+              '~p ^ ~r',
               //  '~p ^ ~r'
             ])
             .map(g => normalize(g))
@@ -312,7 +312,7 @@ describe('resolve', () => {
               '~q v r',
               'r',
               'r → t',
-              't'
+              't',
               // 't'
             ])
             .map(g => normalize(g))
@@ -329,7 +329,7 @@ describe('resolve', () => {
           'CONJ 7 8',
           'MP 9 3',
           'AD u 10',
-          'COND 11'
+          'COND 11',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -344,7 +344,7 @@ describe('resolve', () => {
               's ^ r',
               '~t',
               '~t v u',
-              't -> u'
+              't -> u',
               // 't -> u'
             ])
             .map(g => normalize(g))
@@ -360,7 +360,7 @@ describe('resolve', () => {
           'MT 2 6',
           'DM 3',
           'SIM r 8',
-          'CONJ 7 9'
+          'CONJ 7 9',
         ]
 
         const result = sut(answers, base, { throwOnError: false })
@@ -374,7 +374,7 @@ describe('resolve', () => {
               '~p',
               '~(~r ^ ~(~t v s)',
               'r',
-              '~p ^ r'
+              '~p ^ r',
               // '~p v r'
             ])
             .map(g => normalize(g))

@@ -1,6 +1,6 @@
 import * as LogicActions from './actions'
 import { InvalidActionError, InvalidLineError } from './errors'
-import { Lang, translate } from './translate'
+import { type Lang, translate } from './translate'
 import { clear, normalize } from './utils'
 
 export type LogicAction = keyof typeof LogicActions
@@ -38,7 +38,7 @@ export function resolve<T extends string | string[]>(
   const _options: Required<ResolveOptions> = {
     throwOnError: true,
     lang: 'en',
-    ...options
+    ...options,
   }
 
   if (Array.isArray(lines)) {

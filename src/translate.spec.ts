@@ -9,7 +9,7 @@ describe('translate', () => {
       expect(sut('"a" is true')).toBe('"a" is true')
       expect(sut(['"a" is true', '"b" is false'])).toStrictEqual([
         '"a" is true',
-        '"b" is false'
+        '"b" is false',
       ])
     })
   })
@@ -98,7 +98,7 @@ describe('translate', () => {
       } = {
         InvalidLineError: [1],
         MissingTargetLineError: [1, 2],
-        InvalidActionError: []
+        InvalidActionError: [],
       }
       const caseList = Object.entries(cases)
       expect.assertions(caseList.length * 2)
