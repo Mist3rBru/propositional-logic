@@ -78,8 +78,8 @@ describe('utils', () => {
   it('should catch NOT GROUP', () => {
     expect(strictNotGroupRegex.test('~()')).toBeTruthy()
     expect(strictNotGroupRegex.test('~(qvr)')).toBeTruthy()
-    expect(strictNotGroupRegex.test('()')).not.toBeTruthy()
-    expect(strictNotGroupRegex.test('(qvr)')).not.toBeTruthy()
+    expect(strictNotGroupRegex.test('()')).toBeFalsy()
+    expect(strictNotGroupRegex.test('(qvr)')).toBeFalsy()
   })
 
   it('should catch NOT signal', () => {
@@ -89,8 +89,8 @@ describe('utils', () => {
   })
 
   it('should catch DOUBLE NOT signal', () => {
-    expect(doubleNotRegex.test('~')).not.toBeTruthy()
-    expect(doubleNotRegex.test('~q')).not.toBeTruthy()
+    expect(doubleNotRegex.test('~')).toBeFalsy()
+    expect(doubleNotRegex.test('~q')).toBeFalsy()
     expect(doubleNotRegex.test('~~q')).toBeTruthy()
   })
 
