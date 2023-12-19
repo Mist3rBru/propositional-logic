@@ -1,6 +1,7 @@
 import { describe as sut } from './describe'
 import * as LogicErrors from './errors'
 
+// eslint-disable-next-line jest/valid-title
 describe('describe', () => {
   it('should describe letter', () => {
     expect(sut('a')).toBe('"a" is true')
@@ -69,7 +70,7 @@ describe('describe', () => {
     const caseList = Object.entries(cases)
     expect.assertions(caseList.length)
     for (const [name, params] of caseList) {
-      //@ts-ignore
+      // @ts-expect-error
       const error = new LogicErrors[name](...params)
       expect(sut(error.message)).toBe(error.message)
     }

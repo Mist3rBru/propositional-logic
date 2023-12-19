@@ -29,7 +29,7 @@ export function normalize(...parts: string[]): string {
   return clear(
     parts
       .join(' ')
-      .replace(/([a-zA-Z\^v()~])/g, ' $1 ')
+      .replace(/([a-zA-Z^v()~])/g, ' $1 ')
       .replace(/(?:(\()\s+)|(?:\s+(\)))/g, '$1$2')
       .replace(/~\s+/g, '~')
   )
@@ -89,7 +89,7 @@ export function prune(line: string): string {
 }
 
 export function split(line: string, regex: RegExp): [string, string] {
-  const isArrow = />/.test(regex.source)
+  const isArrow = regex.source.includes('>')
   let index = -1
   let step = 1
   for (let i = 0; i < line.split('').length; i++) {
@@ -103,7 +103,7 @@ export function split(line: string, regex: RegExp): [string, string] {
       break
     }
   }
-  return !!~index
+  return ~index
     ? [line.slice(0, index), line.slice(index + step)]
     : line.split(regex).length === 2
       ? (line.split(regex) as [string, string])

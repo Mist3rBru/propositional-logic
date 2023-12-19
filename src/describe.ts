@@ -108,7 +108,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
     return result
   }
 
-  let result = lines as string
+  let result = lines
 
   if (notGroupRegex.test(result)) {
     result = describeNotGroup(result)

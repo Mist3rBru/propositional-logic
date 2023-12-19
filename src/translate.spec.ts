@@ -103,7 +103,7 @@ describe('translate', () => {
       const caseList = Object.entries(cases)
       expect.assertions(caseList.length * 2)
       for (const [name, params] of caseList) {
-        //@ts-ignore
+        // @ts-expect-error
         const error = new LogicErrors[name](...params)
         const expectedMessage = error.message.replace(
           pt.exceptions[name as keyof LogicError].regex,
@@ -111,7 +111,7 @@ describe('translate', () => {
         )
         expect(sut(error.message)).toBe(expectedMessage)
 
-        //@ts-ignore
+        // @ts-expect-error
         const expectedError = new LogicErrors[name](...params)
         expectedError.message = expectedMessage
         expect(sut(error)).toStrictEqual(expectedError)

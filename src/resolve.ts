@@ -5,7 +5,7 @@ import { clear, normalize } from './utils'
 
 export type LogicAction = keyof typeof LogicActions
 
-type ResolveOptions = {
+interface ResolveOptions {
   /**
    * @default true
    */
@@ -49,6 +49,7 @@ export function resolve<T extends string | string[]>(
     return result as T
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const line = lines as string
   const answerParts = clear(line).split(' ')
 

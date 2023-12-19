@@ -1,4 +1,4 @@
-//http://www.celiomoliterno.eng.br/Arquivos/fatec/TabInferEquiv.pdf
+// http://www.celiomoliterno.eng.br/Arquivos/fatec/TabInferEquiv.pdf
 import { InvalidActionError, MissingTargetLineError } from './errors'
 import {
   andRegex,
@@ -40,7 +40,7 @@ import {
  * //p is equivalent to the negation of not p
  */
 export function dn(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -66,7 +66,7 @@ export function dn(lines: string[], targetLines: number[]): string {
  * //p is true is equiv. to p is true and p is true
  */
 export function ip(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -89,7 +89,7 @@ export function ip(lines: string[], targetLines: number[]): string {
  * //(p or q) is equiv. to (q or p)
  */
 export function com(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -112,7 +112,7 @@ export function com(lines: string[], targetLines: number[]): string {
  * //p and (q and r) is equiv. to (p and q) and r
  */
 export function ass(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -142,7 +142,7 @@ export function ass(lines: string[], targetLines: number[]): string {
  * //The negation of (p or q) is equiv. to (not p and not q)
  */
 export function dm(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -181,7 +181,7 @@ export function dm(lines: string[], targetLines: number[]): string {
  * //p or (q and r) is equiv. to (p or q) and (p or r)
  */
 export function dis(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -226,7 +226,7 @@ export function dis(lines: string[], targetLines: number[]): string {
  * //If p then q is equiv. to if not p then not q
  */
 export function cp(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -257,7 +257,7 @@ export function cp(lines: string[], targetLines: number[]): string {
  * //If p then q is equiv. to if not q then not p
  */
 export function cond(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -287,7 +287,7 @@ export function cond(lines: string[], targetLines: number[]): string {
  * //(p iff q) is equiv. to (if p is true then q is true) and (if q is true then p is true)
  */
 export function bi(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -311,7 +311,7 @@ export function bi(lines: string[], targetLines: number[]): string {
  * //If p or q; therefore q or p
  */
 export function inv(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
@@ -332,7 +332,7 @@ export function inv(lines: string[], targetLines: number[]): string {
  * //p is true; therefore the disjunction (p or q) is true
  */
 export function ad(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -346,7 +346,7 @@ export function ad(lines: string[], targetLines: number[]): string {
 }
 
 export function sim(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -359,6 +359,7 @@ export function sim(lines: string[], targetLines: number[]): string {
     return normalize(
       andCondition,
       arrowSignal,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       andLetters.find(l => l !== result)!
     )
   }
@@ -465,7 +466,7 @@ export function sd(lines: string[], targetLines: number[]): string {
  * //If p then q; if q then r; therefore, if p then r
  */
 export function sh(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
@@ -503,7 +504,7 @@ export function sh(lines: string[], targetLines: number[]): string {
  * //If p then q; and if r then s; but p or r; therefore q or s
  */
 export function dc(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -545,7 +546,7 @@ export function dc(lines: string[], targetLines: number[]): string {
  * //If p then q; and if r then s; but not q or not s; therefore not p or not r
  */
 export function dd(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -587,7 +588,7 @@ export function dd(lines: string[], targetLines: number[]): string {
  * //If p then q; therefore p then p and q
  */
 export function abs(lines: string[], targetLines: number[]): string {
-  if (targetLines.length < 1) {
+  if (!targetLines.length) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 

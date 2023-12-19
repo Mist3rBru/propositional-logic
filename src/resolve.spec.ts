@@ -166,7 +166,7 @@ describe('resolve', () => {
             .concat([
               '~(~p ^ ~r)',
               '~p ^ ~r',
-              //~p ^ ~r
+              // ~p ^ ~r
             ])
             .map(g => normalize(g))
         )

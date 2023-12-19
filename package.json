@@ -33,7 +33,10 @@
     }
   },
   "scripts": {
-    "lint": "tsc && prettier --write .",
+    "lint": "run-s lint:tsc lint:prettier lint:eslint",
+    "lint:tsc": "tsc",
+    "lint:prettier": "prettier --write .",
+    "lint:eslint": "eslint --fix src/**/*.ts",
     "build": "tsc && unbuild",
     "test": "vitest --run",
     "test:w": "vitest --watch",
@@ -47,9 +50,11 @@
     "@types/node": "^20.10.4",
     "@vitest/coverage-v8": "^1.0.4",
     "changeset": "^0.2.6",
+    "eslint": "^8.56.0",
+    "eslint-plugin-mist3rbru": "^0.0.6",
     "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^6.1.1",
     "prettier": "^3.1.1",
-    "tsx": "^4.6.2",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0",
     "vitest": "^1.0.4"
