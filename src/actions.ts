@@ -40,7 +40,7 @@ import {
  * //p is equivalent to the negation of not p
  */
 export function dn(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -66,7 +66,7 @@ export function dn(lines: string[], targetLines: number[]): string {
  * //p is true is equiv. to p is true and p is true
  */
 export function ip(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -89,7 +89,7 @@ export function ip(lines: string[], targetLines: number[]): string {
  * //(p or q) is equiv. to (q or p)
  */
 export function com(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -112,7 +112,7 @@ export function com(lines: string[], targetLines: number[]): string {
  * //p and (q and r) is equiv. to (p and q) and r
  */
 export function ass(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -133,6 +133,14 @@ export function ass(lines: string[], targetLines: number[]): string {
     : normalize(group(parts[0], signal, parts[1]), signal, parts[2])
 }
 
+const dmMap = (groups: string[]): string[] => {
+  return groups.map(g => {
+    return strictNotGroupRegex.test(g)
+      ? resolve(g)
+      : mapNot(group(g)).replace(global(doubleNotRegex), '')
+  })
+}
+
 /**
  * De Morgan's Theorem
  * @example
@@ -142,7 +150,7 @@ export function ass(lines: string[], targetLines: number[]): string {
  * //The negation of (p or q) is equiv. to (not p and not q)
  */
 export function dm(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -151,15 +159,7 @@ export function dm(lines: string[], targetLines: number[]): string {
     throw new InvalidActionError()
   }
 
-  const dmMap = (groups: string[]): string[] => {
-    return groups.map(g => {
-      return strictNotGroupRegex.test(g)
-        ? resolve(g)
-        : mapNot(group(g)).replace(global(doubleNotRegex), '')
-    })
-  }
-
-  const offGroupSignalRegex = /^[^)]+\)([^~(]+)~*\(.+/
+  const offGroupSignalRegex = /^[^)]+\)([^(~]+)~*\(.+/
   const offGroupSignal = target.replace(offGroupSignalRegex, '$1')
   const isMultiGroup = offGroupSignalRegex.test(target)
 
@@ -181,7 +181,7 @@ export function dm(lines: string[], targetLines: number[]): string {
  * //p or (q and r) is equiv. to (p or q) and (p or r)
  */
 export function dis(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -226,7 +226,7 @@ export function dis(lines: string[], targetLines: number[]): string {
  * //If p then q is equiv. to if not p then not q
  */
 export function cp(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -257,7 +257,7 @@ export function cp(lines: string[], targetLines: number[]): string {
  * //If p then q is equiv. to if not q then not p
  */
 export function cond(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -287,7 +287,7 @@ export function cond(lines: string[], targetLines: number[]): string {
  * //(p iff q) is equiv. to (if p is true then q is true) and (if q is true then p is true)
  */
 export function bi(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -311,7 +311,7 @@ export function bi(lines: string[], targetLines: number[]): string {
  * //If p or q; therefore q or p
  */
 export function inv(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
@@ -332,7 +332,7 @@ export function inv(lines: string[], targetLines: number[]): string {
  * //p is true; therefore the disjunction (p or q) is true
  */
 export function ad(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -341,12 +341,12 @@ export function ad(lines: string[], targetLines: number[]): string {
     throw new InvalidActionError()
   }
 
-  const newLetter = last(lines).replace(/^.{3}([^\s]+).+/, '$1')
+  const newLetter = last(lines).replace(/^.{3}(\S+).+/, '$1')
   return normalize(target, orSignal, newLetter)
 }
 
 export function sim(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -365,7 +365,7 @@ export function sim(lines: string[], targetLines: number[]): string {
   }
 
   if (andRegex.test(target)) {
-    const desiredLetter = last(lines).replace(/^.{4}([^\s]+).+/, '$1')
+    const desiredLetter = last(lines).replace(/^.{4}(\S+).+/, '$1')
     if (!desiredLetter) {
       throw new InvalidActionError()
     }
@@ -466,7 +466,7 @@ export function sd(lines: string[], targetLines: number[]): string {
  * //If p then q; if q then r; therefore, if p then r
  */
 export function sh(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 2)
   }
 
@@ -504,7 +504,7 @@ export function sh(lines: string[], targetLines: number[]): string {
  * //If p then q; and if r then s; but p or r; therefore q or s
  */
 export function dc(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -520,8 +520,7 @@ export function dc(lines: string[], targetLines: number[]): string {
   const conditionalGroups = groups.filter((_, i) => i !== orGroupIndex)
   const orLetters = split(groups[orGroupIndex], orRegex)
   const conditionalLetters = conditionalGroups
-    .map(c => split(c, arrowRegex))
-    .flat()
+    .flatMap(c => split(c, arrowRegex))
     .map(clear)
 
   if (
@@ -546,7 +545,7 @@ export function dc(lines: string[], targetLines: number[]): string {
  * //If p then q; and if r then s; but not q or not s; therefore not p or not r
  */
 export function dd(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 
@@ -561,8 +560,7 @@ export function dd(lines: string[], targetLines: number[]): string {
   const conditionalGroups = target.filter((_, i) => i !== orGroupIndex)
   const orLetters = split(target[orGroupIndex], orRegex)
   const conditionalLetters = conditionalGroups
-    .map(c => split(c, arrowRegex))
-    .flat()
+    .flatMap(c => split(c, arrowRegex))
     .map(clear)
     .map(not)
 
@@ -588,7 +586,7 @@ export function dd(lines: string[], targetLines: number[]): string {
  * //If p then q; therefore p then p and q
  */
 export function abs(lines: string[], targetLines: number[]): string {
-  if (!targetLines.length) {
+  if (targetLines.length === 0) {
     throw new MissingTargetLineError(targetLines.length, 1)
   }
 

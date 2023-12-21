@@ -1,11 +1,18 @@
 import { InvalidActionError } from './errors'
-import { translate, pt } from './translate'
+import { translate, pt, type Lang } from './translate'
 import * as LogicErrors from './errors'
+
+const makeSut = (lang: Lang) => {
+  return (lines: string | string[]) => {
+    return translate(lines, lang)
+  }
+}
 
 describe('translate', () => {
   describe('to english', () => {
+    const sut = makeSut('en')
+
     it('should translate sentences to english', () => {
-      const sut = (lines: string | string[]) => translate(lines, 'en')
       expect(sut('"a" is true')).toBe('"a" is true')
       expect(sut(['"a" is true', '"b" is false'])).toStrictEqual([
         '"a" is true',
@@ -15,7 +22,7 @@ describe('translate', () => {
   })
 
   describe('to portuguese', () => {
-    const sut = (line: string) => translate(line, 'pt')
+    const sut = makeSut('pt')
 
     it('should translate "is" cases', () => {
       expect(sut('"a" is true')).toBe('"a" é verdadeiro')
@@ -121,6 +128,7 @@ describe('translate', () => {
 
   it('should not translate unsupported language', () => {
     // @ts-expect-error
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     const sut = () => translate('"a" and "b"', 'invalidLanguage')
     expect(sut).toThrow(InvalidActionError)
   })

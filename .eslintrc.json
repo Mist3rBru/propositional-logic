@@ -1,7 +1,13 @@
 {
   "extends": "plugin:mist3rbru/node",
   "rules": {
-    "no-control-regex": "warn"
+    "no-control-regex": "warn",
+
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-thenable": "off",
+
+    "security/detect-object-injection": "off",
+    "security/detect-non-literal-regexp": "off"
   },
   "overrides": [
     {

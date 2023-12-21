@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-function-scoping */
 import { InvalidActionError, InvalidLineError } from './errors'
 import { resolve as sut } from './resolve'
 import { normalize } from './utils'
@@ -88,17 +89,16 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~p',
-              '~q v r',
-              'r',
-              'r -> t',
-              't',
-              't v u',
-              //  't v u'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~p',
+            '~q v r',
+            'r',
+            'r -> t',
+            't',
+            't v u',
+            //  't v u'
+          ].map(g => normalize(g))
         )
       })
 
@@ -118,9 +118,17 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat(['p', 'q', 's', '~r', 's ^ ~r', '~t', '~t v u', 't -> u'])
-            .map(g => normalize(g))
+          [
+            ...base,
+            'p',
+            'q',
+            's',
+            '~r',
+            's ^ ~r',
+            '~t',
+            '~t v u',
+            't -> u',
+          ].map(g => normalize(g))
         )
       })
 
@@ -138,9 +146,9 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat(['s', '~q v r', 'r', 'r -> t', 't', 't v u'])
-            .map(g => normalize(g))
+          [...base, 's', '~q v r', 'r', 'r -> t', 't', 't v u'].map(g =>
+            normalize(g)
+          )
         )
       })
 
@@ -162,13 +170,12 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~(~p ^ ~r)',
-              '~p ^ ~r',
-              // ~p ^ ~r
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~(~p ^ ~r)',
+            '~p ^ ~r',
+            // ~p ^ ~r
+          ].map(g => normalize(g))
         )
       })
 
@@ -179,16 +186,15 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              'p',
-              'q -> r',
-              'p -> r',
-              'r',
-              'r v t',
-              // 'r v t'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            'p',
+            'q -> r',
+            'p -> r',
+            'r',
+            'r v t',
+            // 'r v t'
+          ].map(g => normalize(g))
         )
       })
 
@@ -207,18 +213,17 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~t',
-              '~t v r',
-              't -> r',
-              '~r',
-              '~r ^ ~t',
-              '~p',
-              'u',
-              // 'u'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~t',
+            '~t v r',
+            't -> r',
+            '~r',
+            '~r ^ ~t',
+            '~p',
+            'u',
+            // 'u'
+          ].map(g => normalize(g))
         )
       })
 
@@ -236,17 +241,16 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~u',
-              '~s',
-              '~r',
-              '~(p ^ q)',
-              '~p v ~q',
-              'p -> ~q',
-              //  'p -> ~q'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~u',
+            '~s',
+            '~r',
+            '~(p ^ q)',
+            '~p v ~q',
+            'p -> ~q',
+            //  'p -> ~q'
+          ].map(g => normalize(g))
         )
       })
 
@@ -257,15 +261,14 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~q',
-              'r → t',
-              't -> p',
-              'r -> p',
-              // 'r -> p'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~q',
+            'r → t',
+            't -> p',
+            'r -> p',
+            // 'r -> p'
+          ].map(g => normalize(g))
         )
       })
 
@@ -284,18 +287,17 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~(q v s)',
-              '~q ^ ~s',
-              '~q',
-              '~p',
-              '~s',
-              '~r',
-              '~p ^ ~r',
-              //  '~p ^ ~r'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~(q v s)',
+            '~q ^ ~s',
+            '~q',
+            '~p',
+            '~s',
+            '~r',
+            '~p ^ ~r',
+            //  '~p ^ ~r'
+          ].map(g => normalize(g))
         )
       })
 
@@ -306,16 +308,15 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~p',
-              '~q v r',
-              'r',
-              'r → t',
-              't',
-              // 't'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~p',
+            '~q v r',
+            'r',
+            'r → t',
+            't',
+            // 't'
+          ].map(g => normalize(g))
         )
       })
 
@@ -335,19 +336,18 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              'p',
-              'q',
-              's',
-              'r',
-              's ^ r',
-              '~t',
-              '~t v u',
-              't -> u',
-              // 't -> u'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            'p',
+            'q',
+            's',
+            'r',
+            's ^ r',
+            '~t',
+            '~t v u',
+            't -> u',
+            // 't -> u'
+          ].map(g => normalize(g))
         )
       })
 
@@ -366,18 +366,17 @@ describe('resolve', () => {
         const result = sut(answers, base, { throwOnError: false })
 
         expect(result).toStrictEqual(
-          base
-            .concat([
-              '~(~s ^ q)',
-              's',
-              '~q',
-              '~p',
-              '~(~r ^ ~(~t v s)',
-              'r',
-              '~p ^ r',
-              // '~p v r'
-            ])
-            .map(g => normalize(g))
+          [
+            ...base,
+            '~(~s ^ q)',
+            's',
+            '~q',
+            '~p',
+            '~(~r ^ ~(~t v s)',
+            'r',
+            '~p ^ r',
+            // '~p v r'
+          ].map(g => normalize(g))
         )
       })
     })

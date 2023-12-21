@@ -1,11 +1,11 @@
 export const strictLetterRegex = /^~*[a-uw-z]$/
 export const strictGroupRegex = /^\((.*?)\)$/
 export const strictNotGroupRegex = /^~\(([^)]*)\)$/
-export const strictOrRegex = /^[∨vV]$/
+export const strictOrRegex = /^[Vv∨]$/
 
-export const arrowRegex = /(?:[-=]>)|(?:−)||→/
-export const biArrowRegex = /(?:<[-=]{0,}>)|⇔/
-export const orRegex = /[∨vV]/
+export const arrowRegex = /(?:[=-]>)|(?:−)||→/
+export const biArrowRegex = /(?:<[=-]*>)|⇔/
+export const orRegex = /[Vv∨]/
 export const andRegex = /[\^∧]/
 export const notRegex = /~/
 export const doubleNotRegex = /~{2}/
@@ -21,7 +21,7 @@ export const biArrowSignal = '<->'
 export function clear(line: string): string {
   return line
     .toLowerCase()
-    .replace(/\s{2,}/g, ' ')
+    .replaceAll(/\s{2,}/g, ' ')
     .trim()
 }
 
@@ -29,9 +29,9 @@ export function normalize(...parts: string[]): string {
   return clear(
     parts
       .join(' ')
-      .replace(/([a-zA-Z^v()~])/g, ' $1 ')
-      .replace(/(?:(\()\s+)|(?:\s+(\)))/g, '$1$2')
-      .replace(/~\s+/g, '~')
+      .replaceAll(/([()A-Z^a-z~])/g, ' $1 ')
+      .replaceAll(/(?:(\()\s+)|(?:\s+(\)))/g, '$1$2')
+      .replaceAll(/~\s+/g, '~')
   )
 }
 
@@ -44,8 +44,8 @@ export function not(line: string): string {
 }
 
 export function mapNot(line: string): string {
-  const isGroup = line.length > 1 && !/^~{1,}\w$/.test(line)
-  return isGroup ? line.split('').map(not).join('') : not(line)
+  const isGroup = line.length > 1 && !/^~+\w$/.test(line)
+  return isGroup ? [...line].map(not).join('') : not(line)
 }
 
 export function ungroup(line: string): string {
@@ -56,7 +56,7 @@ export function ungroup(line: string): string {
     : f === '(' && l !== ')'
       ? line.slice(1)
       : f !== '~' && l === ')' && !/.+\(.+/.test(line)
-        ? line.slice(0, line.length - 1)
+        ? line.slice(0, -1)
         : line
 }
 
@@ -85,14 +85,14 @@ export function resolve(line: string): string {
 }
 
 export function prune(line: string): string {
-  return line.replace(/\s/g, '')
+  return line.replaceAll(/\s/g, '')
 }
 
 export function split(line: string, regex: RegExp): [string, string] {
   const isArrow = regex.source.includes('>')
   let index = -1
   let step = 1
-  for (let i = 0; i < line.split('').length; i++) {
+  for (let i = 0; i < line.length; i++) {
     if (regex.test(line[i])) {
       index = i
       break
@@ -150,9 +150,7 @@ export function catchSignal(line: string): [regex: RegExp, signal: string] {
 export function invertSignal(line: string): string {
   let invertedStr = ''
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i]
-
+  for (const char of line) {
     if (orRegex.test(char)) {
       invertedStr += andSignal
     } else if (andRegex.test(char)) {
@@ -170,7 +168,7 @@ export function first(lines: string | string[]): string {
 }
 
 export function last(lines: string | string[]): string {
-  return lines[lines.length - 1]
+  return lines.at(-1) ?? ''
 }
 
 export function targets(lines: string[], targetLines: number[]): string[] {

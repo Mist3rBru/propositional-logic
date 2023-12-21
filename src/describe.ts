@@ -18,7 +18,7 @@ import {
 function concat(...words: string[]): string {
   return words
     .join(' ')
-    .replace(/\s{2,}/g, ' ')
+    .replaceAll(/\s{2,}/g, ' ')
     .trim()
 }
 
@@ -34,7 +34,7 @@ function describeLetter(letter: string): string {
     return letter
   }
 
-  const notSignalsLength = letter.replace(/[^~]/g, '').length
+  const notSignalsLength = letter.replaceAll(/[^~]/g, '').length
   const absoluteLetter = quote(letter.replace(global(notRegex), ''))
   return notSignalsLength % 2 === 0
     ? concat(absoluteLetter, 'is true')
@@ -52,11 +52,11 @@ function describeOperators(line: string): string {
     line = line
       .replace(andRegex, 'and')
       .replace(
-        /(["\w]+)\sis\strue\sand\s(["\w]+)\sis\strue/,
+        /([\w"]+)\sis\strue\sand\s([\w"]+)\sis\strue/,
         '$1 and $2 are true'
       )
       .replace(
-        /(["\w]+)\sis\sfalse\sand\s(["\w]+)\sis\sfalse/,
+        /([\w"]+)\sis\sfalse\sand\s([\w"]+)\sis\sfalse/,
         '$1 and $2 are false'
       )
   }
@@ -119,7 +119,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
 
   result = mapWords(result, describeLetter)
   result = describeOperators(result)
-  result = extract(extract(result, /\s+([,)])/g), /([(])\s+/g)
+  result = extract(extract(result, /\s+([),])/g), /(\()\s+/g)
 
   return translate(result, lang)
 }

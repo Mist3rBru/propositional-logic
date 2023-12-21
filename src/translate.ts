@@ -82,10 +82,10 @@ export function translate<T extends string | string[] | Error>(
       break
     case 'pt':
       result = line
-        .replace(/(\w+)/g, match => {
+        .replaceAll(/(\w+)/g, match => {
           return pt.keywords[match as Keyword] ?? match
         })
-        .replace(/(são\s\w+)/g, '$1s')
+        .replaceAll(/(são\s\w+)/g, '$1s')
       if (result === line) {
         for (const { regex, translation } of Object.values(pt.exceptions)) {
           if (regex.test(line)) {
