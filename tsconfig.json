@@ -15,6 +15,6 @@
     "skipLibCheck": true,
 
     "lib": ["ES2022"],
-    "types": ["vitest/globals"]
-  }
+    "types": ["vitest/globals"],
+  },
 }

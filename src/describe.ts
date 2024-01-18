@@ -26,6 +26,7 @@ function quote(letter: string): string {
   if (!strictLetterRegex.test(letter)) {
     return letter
   }
+
   return `"${letter}"`
 }
 
@@ -36,6 +37,7 @@ function describeLetter(letter: string): string {
 
   const notSignalsLength = letter.replaceAll(/[^~]/g, '').length
   const absoluteLetter = quote(letter.replace(global(notRegex), ''))
+
   return notSignalsLength % 2 === 0
     ? concat(absoluteLetter, 'is true')
     : concat(absoluteLetter, 'is false')
@@ -45,9 +47,11 @@ function describeOperators(line: string): string {
   if (orRegex.test(line) && andRegex.test(line)) {
     line = line.replace(andRegex, 'and').replace(orRegex, ', or')
   }
+
   if (orRegex.test(line)) {
     line = mapWords(line, word => (strictOrRegex.test(word) ? 'or' : word))
   }
+
   if (andRegex.test(line)) {
     line = line
       .replace(andRegex, 'and')
@@ -60,12 +64,15 @@ function describeOperators(line: string): string {
         '$1 and $2 are false'
       )
   }
+
   if (biArrowRegex.test(line)) {
     line = concat('if and only if', line.replace(biArrowRegex, ', then'))
   }
+
   if (arrowRegex.test(line)) {
     line = concat('if', line.replace(arrowRegex, ', then'))
   }
+
   return line
 }
 
@@ -96,6 +103,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
   if (Array.isArray(lines)) {
     const normalizedLines = lines.map(g => normalize(g))
     let result = ''
+
     for (let i = 0; i < normalizedLines.length; i++) {
       const description = describe(lines[i], lang)
       result +=
@@ -105,6 +113,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
             ? concat(';', translate('therefore', lang), description)
             : concat(';', description)
     }
+
     return result
   }
 
@@ -113,6 +122,7 @@ export function describe(lines: string | string[], lang: Lang = 'en'): string {
   if (notGroupRegex.test(result)) {
     result = describeNotGroup(result)
   }
+
   if (groupRegex.test(result)) {
     result = describeGroup(result, lang)
   }

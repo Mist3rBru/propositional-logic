@@ -2,6 +2,7 @@ import * as actions from './actions'
 import { InvalidActionError, MissingTargetLineError } from './errors'
 
 type Actions = typeof actions
+
 type ActionKey = keyof Actions
 
 const make = (...lines: string[]): [string[], number[]] => {
@@ -24,6 +25,7 @@ describe('actions', () => {
   it('should throw MissingTargetLineError', () => {
     const actionsList = Object.values(actions)
     expect.assertions(actionsList.length)
+
     for (const action of actionsList) {
       expect(() => action([], [])).toThrow(MissingTargetLineError)
     }

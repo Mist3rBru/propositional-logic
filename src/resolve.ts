@@ -43,9 +43,11 @@ export function resolve<T extends string | string[]>(
 
   if (Array.isArray(lines)) {
     const result = solvedLines.map(g => normalize(g))
+
     for (const unsolvedLine of lines) {
       result.push(resolve(unsolvedLine, result, _options))
     }
+
     return result as T
   }
 
@@ -54,10 +56,13 @@ export function resolve<T extends string | string[]>(
   const answerParts = clear(line).split(' ')
 
   const action = answerParts[0] as LogicAction
-  if (!LogicActions[action] && _options.throwOnError) {
+  const isValidAction = action in LogicActions
+
+  if (!isValidAction && _options.throwOnError) {
     throw translate(new InvalidActionError(), _options.lang)
   }
-  if (!LogicActions[action]) {
+
+  if (!isValidAction) {
     return translate(new InvalidActionError().message, _options.lang) as T
   }
 
@@ -65,9 +70,11 @@ export function resolve<T extends string | string[]>(
     .map(n => Number(n) - 1)
     .filter(n => !Number.isNaN(n))
   const notFoundLine = targetLines.find(n => n < 0 || n >= solvedLines.length)
+
   if (notFoundLine && _options.throwOnError) {
     throw translate(new InvalidLineError(notFoundLine + 1), _options.lang)
   }
+
   if (notFoundLine) {
     return translate(
       new InvalidLineError(notFoundLine + 1).message,
@@ -81,6 +88,7 @@ export function resolve<T extends string | string[]>(
     if (_options.throwOnError) {
       throw translate(error, _options.lang)
     }
+
     return translate(error.message, _options.lang)
   }
 }

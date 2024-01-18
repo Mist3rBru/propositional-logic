@@ -83,9 +83,10 @@ export function translate<T extends string | string[] | Error>(
     case 'pt':
       result = line
         .replaceAll(/(\w+)/g, match => {
-          return pt.keywords[match as Keyword] ?? match
+          return match in pt.keywords ? pt.keywords[match as Keyword] : match
         })
         .replaceAll(/(são\s\w+)/g, '$1s')
+
       if (result === line) {
         for (const { regex, translation } of Object.values(pt.exceptions)) {
           if (regex.test(line)) {
@@ -101,6 +102,7 @@ export function translate<T extends string | string[] | Error>(
 
   if (isError) {
     lines.message = result
+
     return lines
   }
 
