@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/padding-line-between-statements */
 export const strictLetterRegex = /^~*[a-uw-z]$/
 export const strictGroupRegex = /^\((.*?)\)$/
 export const strictNotGroupRegex = /^~\(([^)]*)\)$/
@@ -17,6 +18,8 @@ export const orSignal = 'v'
 export const andSignal = '^'
 export const arrowSignal = '->'
 export const biArrowSignal = '<->'
+
+/* eslint-enable @typescript-eslint/padding-line-between-statements */
 
 export function clear(line: string): string {
   return line
@@ -45,12 +48,14 @@ export function not(line: string): string {
 
 export function mapNot(line: string): string {
   const isGroup = line.length > 1 && !/^~+\w$/.test(line)
+
   return isGroup ? [...line].map(not).join('') : not(line)
 }
 
 export function ungroup(line: string): string {
   const f = first(line)
   const l = last(line)
+
   return strictGroupRegex.test(line) && !/.+\).+/.test(line)
     ? line.replace(strictGroupRegex, '$1')
     : f === '(' && l !== ')'
@@ -62,6 +67,7 @@ export function ungroup(line: string): string {
 
 export function group(...letters: string[]): string {
   const line = letters.join(' ')
+
   return /^~*\(.+\)$/.test(line)
     ? /.\)./.test(line)
       ? `(${line})`
@@ -75,12 +81,15 @@ export function group(...letters: string[]): string {
 
 export function resolve(line: string): string {
   let result = line
+
   if (strictNotGroupRegex.test(result)) {
     result = mapNot(result.replace(strictNotGroupRegex, '$1'))
   }
+
   if (doubleNotRegex.test(result)) {
     result = result.replace(global(doubleNotRegex), '')
   }
+
   return ungroup(result)
 }
 
@@ -92,17 +101,20 @@ export function split(line: string, regex: RegExp): [string, string] {
   const isArrow = regex.source.includes('>')
   let index = -1
   let step = 1
+
   for (let i = 0; i < line.length; i++) {
     if (regex.test(line[i])) {
       index = i
       break
     }
+
     if (isArrow && regex.test(line[i] + line[i + 1])) {
       index = i
       step = 2
       break
     }
   }
+
   return ~index
     ? [line.slice(0, index), line.slice(index + step)]
     : line.split(regex).length === 2
@@ -130,6 +142,7 @@ export function global(regex: RegExp): RegExp {
   if (regex.global) {
     return regex
   }
+
   return new RegExp(regex, 'g')
 }
 

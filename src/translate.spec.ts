@@ -109,6 +109,7 @@ describe('translate', () => {
       }
       const caseList = Object.entries(cases)
       expect.assertions(caseList.length * 2)
+
       for (const [name, params] of caseList) {
         // @ts-expect-error
         const error = new LogicErrors[name](...params)

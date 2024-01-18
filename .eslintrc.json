@@ -7,7 +7,9 @@
     "unicorn/no-thenable": "off",
 
     "security/detect-object-injection": "off",
-    "security/detect-non-literal-regexp": "off"
+    "security/detect-non-literal-regexp": "off",
+
+    "import/namespace": "off"
   },
   "overrides": [
     {
