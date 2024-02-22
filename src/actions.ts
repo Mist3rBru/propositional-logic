@@ -55,6 +55,7 @@ export function dn(lines: string[], targetLines: number[]): string {
   if (isTruthy) {
     return `~~${target}`
   }
+
   throw new InvalidActionError()
 }
 
@@ -449,6 +450,7 @@ export function mt(lines: string[], targetLines: number[]): string {
   if (compare(data, resolve(mapNot(result)))) {
     return normalize(not(requirement))
   }
+
   throw new InvalidActionError()
 }
 
@@ -477,6 +479,7 @@ export function sd(lines: string[], targetLines: number[]): string {
   if (compare(data, mapNot(caseB))) {
     return normalize(caseA)
   }
+
   throw new InvalidActionError()
 }
 
@@ -561,6 +564,7 @@ export function dc(lines: string[], targetLines: number[]): string {
   ) {
     return normalize(conditionalLetters[1], orSignal, conditionalLetters[3])
   }
+
   throw new InvalidActionError()
 }
 
@@ -604,6 +608,7 @@ export function dd(lines: string[], targetLines: number[]): string {
   ) {
     return normalize(conditionalLetters[0], orSignal, conditionalLetters[2])
   }
+
   throw new InvalidActionError()
 }
 

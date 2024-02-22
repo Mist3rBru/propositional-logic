@@ -89,6 +89,6 @@ export function resolve<T extends string | string[]>(
       throw translate(error, _options.lang)
     }
 
-    return translate(error.message, _options.lang)
+    return translate((error as Error).message, _options.lang) as T
   }
 }

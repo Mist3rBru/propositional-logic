@@ -1,3 +1,4 @@
+/* eslint-disable jest/valid-title */
 import * as actions from './actions'
 import { InvalidActionError, MissingTargetLineError } from './errors'
 

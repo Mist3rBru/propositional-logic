@@ -1,7 +1,13 @@
 {
+  "root": true,
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
   "extends": "plugin:mist3rbru/node",
   "rules": {
     "no-control-regex": "warn",
+
+    "@typescript-eslint/no-magic-numbers": "off",
 
     "unicorn/no-array-callback-reference": "off",
     "unicorn/no-thenable": "off",
