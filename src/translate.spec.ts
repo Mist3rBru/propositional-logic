@@ -1,5 +1,6 @@
 import { InvalidActionError } from './errors'
-import { translate, pt, type Lang } from './translate'
+import { translate, pt } from './translate'
+import type { Lang } from './translate'
 import * as LogicErrors from './errors'
 
 const makeSut = (lang: Lang) => {

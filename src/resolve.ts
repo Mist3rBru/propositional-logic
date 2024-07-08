@@ -1,6 +1,7 @@
 import * as LogicActions from './actions'
 import { InvalidActionError, InvalidLineError } from './errors'
-import { type Lang, translate } from './translate'
+import { translate } from './translate'
+import type { Lang } from './translate'
 import { clear, normalize } from './utils'
 
 export type LogicAction = keyof typeof LogicActions

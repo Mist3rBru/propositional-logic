@@ -74,7 +74,7 @@ export function group(...letters: string[]): string {
       : line
     : /^~*\([^)]+$/.test(line)
       ? `${line})`
-      : line.endsWith(")")
+      : line.endsWith(')')
         ? `(${line}`
         : `(${line})`
 }

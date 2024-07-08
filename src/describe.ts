@@ -1,4 +1,5 @@
-import { type Lang, translate } from './translate'
+import { translate } from './translate'
+import type { Lang } from './translate'
 import {
   andRegex,
   arrowRegex,
